@@ -132,7 +132,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 		do
 			index = "Duration"
 			node = mainnode:AddNode(index, "icon16/time.png")
-			for k, v in pairs(SoundData[index]) do
+			for _, v in pairs(SoundData[index]) do
 				subnode = node:AddNode(v, "icon16/page.png")
 				subnode.IsDataNode = true
 			end
@@ -140,7 +140,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 		do
 			index = "Size"
 			node = mainnode:AddNode(index, "icon16/disk.png")
-			for k, v in pairs(SoundData[index]) do
+			for _, v in pairs(SoundData[index]) do
 				subnode = node:AddNode(v, "icon16/page.png")
 				subnode.IsDataNode = true
 			end
@@ -172,7 +172,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 			local tabchannel = SoundData["channel"] or 0
 			if istable(tabchannel) then
 				node = mainnode:AddNode("Channel", "icon16/page_white_gear.png")
-				for k, v in pairs(tabchannel) do
+				for _, v in pairs(tabchannel) do
 					subnode = node:AddNode(v, "icon16/page.png")
 					subnode.IsDataNode = true
 					subnode = node:AddNode(TranslateCHAN[v] or TranslateCHAN[CHAN_USER_BASE], "icon16/page.png")
@@ -190,7 +190,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 			local tablevel = SoundData["level"] or 0
 			if istable(tablevel) then
 				node = mainnode:AddNode("Level", "icon16/page_white_gear.png")
-				for k, v in pairs(tablevel) do
+				for _, v in pairs(tablevel) do
 					subnode = node:AddNode(v, "icon16/page.png")
 					subnode.IsDataNode = true
 					subnode = node:AddNode(v, "icon16/page.png")
@@ -206,7 +206,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 			local tabpitch = SoundData["volume"] or 0
 			if istable(tabpitch) then
 				node = mainnode:AddNode("Volume", "icon16/page_white_gear.png")
-				for k, v in pairs(tabpitch) do
+				for _, v in pairs(tabpitch) do
 					subnode = node:AddNode(v, "icon16/page.png")
 					subnode.IsDataNode = true
 				end
@@ -220,7 +220,7 @@ local function GenerateInfoTree(strfile, backnode, count)
 			local tabpitch = SoundData["pitch"] or 0
 			if istable(tabpitch) then
 				node = mainnode:AddNode("Pitch", "icon16/page_white_gear.png")
-				for k, v in pairs(tabpitch) do
+				for _, v in pairs(tabpitch) do
 					subnode = node:AddNode(v, "icon16/page.png")
 					subnode.IsDataNode = true
 				end

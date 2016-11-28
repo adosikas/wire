@@ -350,14 +350,14 @@ local function SetupClipboard(strSound)
 	SetClipboardText(strSound)
 end
 
-local function Sendmenu(strSound, SoundEmitter, nSoundVolume, nSoundPitch) -- Open a sending and setup menu on right click on a sound file.
+local function Sendmenu(strSound, soundemitter, nSoundVolume, nSoundPitch) -- Open a sending and setup menu on right click on a sound file.
 	if not isstring(strSound) then return end
 	if strSound == "" then return end
 
 	local Menu = DermaMenu()
 	local MenuItem
 
-	if SoundEmitter then
+	if soundemitter then
 
 		-- Setup soundemitter
 			MenuItem = Menu:AddOption("Setup soundemitter", function()
@@ -492,7 +492,7 @@ local function Sendmenu(strSound, SoundEmitter, nSoundVolume, nSoundPitch) -- Op
 	Menu:Open()
 end
 
-local function Infomenu(parent, node, SoundEmitter, nSoundVolume, nSoundPitch)
+local function Infomenu(parent, node, soundemitter, nSoundVolume, nSoundPitch)
 	if not IsValid(node) then return end
 	if not node.IsDataNode then return end
 
@@ -500,7 +500,7 @@ local function Infomenu(parent, node, SoundEmitter, nSoundVolume, nSoundPitch)
 	local IsSoundNode = node.IsSoundNode
 
 	if IsSoundNode then
-		Sendmenu(strNodeName, SoundEmitter, nSoundVolume, nSoundPitch)
+		Sendmenu(strNodeName, soundemitter, nSoundVolume, nSoundPitch)
 		return
 	end
 
@@ -632,7 +632,7 @@ local function CreateSoundBrowser(path, se)
 		if not IsValid(node) then return end
 
 		parent:SetSelectedItem(node)
-		Infomenu(parent, node, SoundEmitter, nSoundVolume, nSoundPitch)
+		Infomenu(parent, node, soundemitter, nSoundVolume, nSoundPitch)
 	end
 
 	SoundInfoTree.OnNodeSelected = function( parent, node )

@@ -58,7 +58,7 @@ local function FormatLength(nduration)
 	local nm = math.floor(nduration / 60)
 	local ns = math.floor(nduration % 60)
 	local nms = (nduration % 1) * 1000
-	return nduration, (string.format("%01d", nm)..":"..string.format("%02d", ns).."."..string.format("%03d", nms))
+	return string.format("%01d", nm)..":"..string.format("%02d", ns).."."..string.format("%03d", nms)
 end
 
 local function GetInfoTable(strfile)
@@ -69,7 +69,7 @@ local function GetInfoTable(strfile)
 	if nduration then
 		nduration = math.Round(nduration * 1000) / 1000
 	end
-	local nduration, strduration = FormatLength(nduration, nsize)
+	local strduration = FormatLength(nduration, nsize)
 	local nsizeB, strsize = FormatSize(nsize)
 
 	local T = {}
@@ -675,7 +675,7 @@ local function CreateSoundBrowser(path, se)
 		if not nsize then return end
 
 		local nsizeB, strsize = FormatSize(nsize, nduration)
-		local nduration, strduration = FormatLength(nduration, nsize)
+		local strduration = FormatLength(nduration, nsize)
 
 		-- return {strformat, strsize or "n/a", strduration or "n/a"} -- getting the duration is very slow.
 		return {strformat, strsize or "n/a"}
@@ -913,11 +913,6 @@ local function OpenSoundBrowser(pl, cmd, args)
 	WireLib.Timedcall(function(SoundBrowserPanel, TabFileBrowser, path, se)
 		if not IsValid(SoundBrowserPanel) then return end
 		if not IsValid(TabFileBrowser) then return end
-
-		local soundemitter = false
-		if isstring(path) and path ~= "" then
-			soundemitter = true
-		end
 
 		local soundemitter = false
 		if isstring(path) and path ~= "" then

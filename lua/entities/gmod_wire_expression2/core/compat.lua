@@ -1,27 +1,39 @@
 -- Functions in this file are retained purely for backwards-compatibility. They should not be used in new code and might be removed at any time.
 
+--- @nodoc
+--- deprecated - use teamName(number)
 e2function string number:teamName()
 	local str = team.GetName(this)
 	if not str then return "" end
 	return str
 end
 
+--- @nodoc
+--- deprecated - use teamScore(number)
 e2function number number:teamScore()
 	return team.GetScore(this)
 end
 
+--- @nodoc
+--- deprecated - use teamPlayers(number)
 e2function number number:teamPlayers()
 	return team.NumPlayers(this)
 end
 
+--- @nodoc
+--- deprecated - use teamDeaths(number)
 e2function number number:teamDeaths()
 	return team.TotalDeaths(this)
 end
 
+--- @nodoc
+--- deprecated - use teamFrags(number)
 e2function number number:teamFrags()
 	return team.TotalFrags(this)
 end
 
+--- @nodoc
+--- deprecated - use entity():setColor(r,g,b)
 e2function void setColor(r, g, b)
 	self.entity:SetColor(Color(math.Clamp(r, 0, 255), math.Clamp(g, 0, 255), math.Clamp(b, 0, 255), 255))
 end
@@ -30,12 +42,16 @@ __e2setcost(30) -- temporary
 
 local clamp = WireLib.clampForce
 
+--- @nodoc
+--- deprecated - use entity():applyForce(force)
 e2function void applyForce(vector force)
 	force = clamp(force)
 	local phys = self.entity:GetPhysicsObject()
 	phys:ApplyForceCenter(Vector(force[1],force[2],force[3]))
 end
 
+--- @nodoc
+--- deprecated - use entity():applyOffsetForce(force, position)
 e2function void applyOffsetForce(vector force, vector position)
 	force 		= clamp(force)
 	position 	= clamp(position)
@@ -43,6 +59,8 @@ e2function void applyOffsetForce(vector force, vector position)
 	phys:ApplyForceOffset(Vector(force[1],force[2],force[3]), Vector(position[1],position[2],position[3]))
 end
 
+--- @nodoc
+--- deprecated - use entity():applyAngForce(force)
 e2function void applyAngForce(angle angForce)
 	if angForce[1] == 0 and angForce[2] == 0 and angForce[3] == 0 then return end
 	angForce = clamp(angForce)
@@ -77,6 +95,8 @@ e2function void applyAngForce(angle angForce)
 	end
 end
 
+--- @nodoc
+--- deprecated - use entity():applyTorque(torque)
 e2function void applyTorque(vector torque)
 	if torque[1] == 0 and torque[2] == 0 and torque[3] == 0 then return end
 	torque = clamp(torque)
@@ -109,6 +129,8 @@ end
 
 __e2setcost(10)
 
+--- @nodoc
+--- deprecated - use entity():boxSize():z()
 e2function number entity:height()
 	--[[	Old code (UGLYYYY)
 	if(!IsValid(this)) then return 0 end

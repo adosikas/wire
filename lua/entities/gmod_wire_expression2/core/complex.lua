@@ -37,7 +37,7 @@ local function format(value)
 end
 WireLib.registerDebuggerFormat("COMPLEX", format)
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(2)
 
@@ -53,7 +53,7 @@ registerType("complex", "c", { 0, 0 },
 	end
 )
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(4)
 
@@ -85,7 +85,7 @@ local function cdiv(a,b)
 	return {(a[1]*b[1]+a[2]*b[2])/l, (a[2]*b[1]-a[1]*b[2])/l}
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(2)
 
@@ -144,7 +144,7 @@ e2function number operator!=(number lhs, complex rhs)
 		else return 0 end
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 e2function complex operator_neg(complex z)
 	return {-z[1], -z[2]}
@@ -211,7 +211,8 @@ e2function complex operator^(complex lhs, number rhs)
 	return cexp(rhs*l[1], rhs*l[2])
 end
 
-/******************************** constructors ********************************/
+--[[******************************************************************************]]--
+-- constructors
 
 --- Returns complex zero
 e2function complex comp()
@@ -238,7 +239,8 @@ e2function complex i(b)
 	return {0, b}
 end
 
-/****************************** helper functions ******************************/
+--[[******************************************************************************]]--
+-- helper functions
 
 --- Returns the absolute value of <z>
 e2function number abs(complex z)
@@ -270,7 +272,8 @@ e2function number imag(complex z)
 	return z[2]
 end
 
-/***************************** exp and logarithms *****************************/
+--[[******************************************************************************]]--
+-- exp and logarithms
 
 --- Raises Euler's constant e to the power of <z>
 e2function complex exp(complex z)
@@ -305,7 +308,7 @@ e2function complex log10(complex z)
 	return {l[1]/log(10), l[2]/log(10)}
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 --- Calculates the square root of <z>
 e2function complex sqrt(complex z)
@@ -322,7 +325,8 @@ e2function complex csqrt(n)
 	end
 end
 
-/******************* trigonometric and hyperbolic functions *******************/
+--[[******************************************************************************]]--
+-- trigonometric functions
 
 __e2setcost(3)
 
@@ -396,7 +400,8 @@ e2function number atan2(complex z)
 	return atan2(z[2], z[1])
 end
 
--- ******************** hyperbolic functions *********************** --
+--[[******************************************************************************]]--
+-- hyperbolic functions
 
 __e2setcost(4)
 
@@ -446,7 +451,7 @@ e2function complex csch(complex z)
         return cdiv({1,0},s)
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(15)
 
@@ -454,6 +459,7 @@ __e2setcost(15)
 e2function string toString(complex z)
 	return format(z)
 end
+--- Formats the complex number as a string.
 e2function string complex:toString()
 	return format(this)
 end

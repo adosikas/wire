@@ -48,7 +48,7 @@ end)
 --[[************************************************************************]]--
 __e2setcost(3)
 
---- If <activate> == 0, the chip will no longer run on chat events, otherwise it makes this chip execute when someone chats. Only needs to be called once, not in every execution.
+--- If set to 0, the chip will no longer run on chat events, otherwise it makes this chip execute when someone chats. Only needs to be called once, not in every execution
 e2function void runOnChat(activate)
 	if activate ~= 0 then
 		ChatAlert[self.entity] = true
@@ -69,7 +69,7 @@ e2function number chatClk(entity ply)
 	return runByChat
 end
 
---- If <hide> != 0, hide the chat message that is currently being processed.
+--- If set to 1, hides the chat message (only for messages by E2 owner)
 e2function void hideChat(hide)
 	chipHideChat = hide ~= 0
 end

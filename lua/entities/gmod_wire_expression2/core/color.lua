@@ -17,10 +17,11 @@ local function ColorClamp(c)
 	return c
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(2)
 
+--- Returns the entities color
 e2function vector entity:getColor()
 	if !IsValid(this) then return {0,0,0} end
 
@@ -28,16 +29,19 @@ e2function vector entity:getColor()
 	return { c.r, c.g, c.b }
 end
 
+--- Returns the entities color and alpha
 e2function vector4 entity:getColor4()
 	if not IsValid(this) then return {0,0,0,0} end
 	local c = this:GetColor()
 	return {c.r,c.g,c.b,c.a}
 end
 
+--- Returns the entities alpha
 e2function number entity:getAlpha()
 	return IsValid(this) and this:GetColor().a or 0
 end
 
+--- Sets the entities color
 e2function void entity:setColor(r,g,b)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -45,6 +49,7 @@ e2function void entity:setColor(r,g,b)
 	this:SetColor(ColorClamp(Color(r,g,b,this:GetColor().a)))
 end
 
+--- Sets the entities color and alpha
 e2function void entity:setColor(r,g,b,a)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -53,6 +58,7 @@ e2function void entity:setColor(r,g,b,a)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
+--- Sets the entities color
 e2function void entity:setColor(vector c)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -60,6 +66,7 @@ e2function void entity:setColor(vector c)
 	this:SetColor(ColorClamp(Color(c[1],c[2],c[3],this:GetColor().a)))
 end
 
+--- Sets the entities color and alpha
 e2function void entity:setColor(vector c, a)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -68,6 +75,7 @@ e2function void entity:setColor(vector c, a)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
+--- Sets the entities color and alpha
 e2function void entity:setColor(vector4 c)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -76,6 +84,7 @@ e2function void entity:setColor(vector4 c)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
+--- Sets the entities alpha
 e2function void entity:setAlpha(a)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -88,6 +97,8 @@ e2function void entity:setAlpha(a)
 	this:SetRenderMode(c.a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
+--- Sets the entities render mode
+--- See [RENDERMODE Enum](http://wiki.garrysmod.com/page/Enums/RENDERMODE)
 e2function void entity:setRenderMode(mode)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -96,24 +107,27 @@ e2function void entity:setRenderMode(mode)
 	this:SetRenderMode(mode)
 end
 
---- HSV
+--[[******************************************************************************]]--
+-- HSV
 
---- Converts <hsv> from the [http://en.wikipedia.org/wiki/HSV_color_space HSV color space] to the [http://en.wikipedia.org/wiki/RGB_color_space RGB color space]
+--- Converts <hsv> from the [HSV color space](http://en.wikipedia.org/wiki/HSV_color_space) to the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space)
 e2function vector hsv2rgb(vector hsv)
 	local col = HSVToColor(hsv[1], hsv[2], hsv[3])
 	return { col.r, col.g, col.b }
 end
 
+--- Converts <hsv> from the [HSV color space](http://en.wikipedia.org/wiki/HSV_color_space) to the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space)
 e2function vector hsv2rgb(h, s, v)
 	local col = HSVToColor(h, s, v)
 	return { col.r, col.g, col.b }
 end
 
---- Converts <rgb> from the [http://en.wikipedia.org/wiki/RGB_color_space RGB color space] to the [http://en.wikipedia.org/wiki/HSV_color_space HSV color space]
+--- Converts <rgb> from the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space) to the [HSV color space](http://en.wikipedia.org/wiki/HSV_color_space)
 e2function vector rgb2hsv(vector rgb)
 	return { ColorToHSV(Color(rgb[1], rgb[2], rgb[3])) }
 end
 
+--- Converts <rgb> from the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space) to the [HSV color space](http://en.wikipedia.org/wiki/HSV_color_space)
 e2function vector rgb2hsv(r, g, b)
 	return { ColorToHSV(Color(r, g, b)) }
 end
@@ -184,27 +198,30 @@ local function Convert_rgb2hsl(r, g, b)
 	return h, s, l
 end
 
---- Converts <hsl> HSL color space to RGB color space
+--- Converts <hsl> from the [HSL color space](http://en.wikipedia.org/wiki/HSL_color_space) to the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space)
 e2function vector hsl2rgb(vector hsl)
 	return { RGBClamp(Convert_hsl2rgb(hsl[1] / 360, hsl[2], hsl[3])) }
 end
 
+--- Converts <hsl> from the [HSL color space](http://en.wikipedia.org/wiki/HSL_color_space) to the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space)
 e2function vector hsl2rgb(h, s, l)
 	return { RGBClamp(Convert_hsl2rgb(h / 360, s, l)) }
 end
 
---- Converts <rgb> RGB color space to HSL color space
+--- Converts <rgb> from the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space) to the [HSL color space](http://en.wikipedia.org/wiki/HSL_color_space)
 e2function vector rgb2hsl(vector rgb)
 	local h,s,l = Convert_rgb2hsl(RGBClamp(rgb[1], rgb[2], rgb[3]))
 	return { floor(h * 360), s, l }
 end
 
+--- Converts <rgb> from the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space) to the [HSL color space](http://en.wikipedia.org/wiki/HSL_color_space)
 e2function vector rgb2hsl(r, g, b)
 	local h,s,l = Convert_rgb2hsl(RGBClamp(r, g, b))
 	return { floor(h * 360), s, l }
 end
 
---- DIGI
+--[[******************************************************************************]]--
+-- DIGI
 
 local converters = {}
 converters[0] = function(r, g, b)

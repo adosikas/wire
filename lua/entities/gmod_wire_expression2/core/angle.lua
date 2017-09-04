@@ -19,30 +19,33 @@ registerType("angle", "a", { 0, 0, 0 },
 local pi = math.pi
 local floor, ceil = math.floor, math.ceil
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(1) -- approximated
 
+--- Creates an angle with pitch, roll and yaw = 0
 e2function angle ang()
 	return { 0, 0, 0 }
 end
 
 __e2setcost(2)
 
+--- Creates an angle with pitch, yaw and roll = n
 e2function angle ang(rv1)
 	return { rv1, rv1, rv1 }
 end
 
+--- Creates an angle with given pitch, yaw and roll
 e2function angle ang(rv1, rv2, rv3)
 	return { rv1, rv2, rv3 }
 end
 
-// Convert Vector -> Angle
+--- Creates an angle from a vector with pitch=x, yaw=y and roll=z
 e2function angle ang(vector rv1)
 	return {rv1[1],rv1[2],rv1[3]}
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 registerOperator("ass", "a", "a", function(self, args)
 	local op1, op2, scope = args[2], args[3], args[4]
@@ -52,7 +55,7 @@ registerOperator("ass", "a", "a", function(self, args)
 	return rv2
 end)
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 e2function number operator_is(angle rv1)
 	if rv1[1] != 0 || rv1[2] != 0 || rv1[3] != 0
@@ -103,7 +106,7 @@ e2function number operator<(angle rv1, angle rv2)
 	   then return 1 else return 0 end
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 registerOperator("dlt", "a", "a", function(self, args)
 	local op1, scope = args[2], args[3]
@@ -174,51 +177,59 @@ e2function number angle:operator[](index, value)
 	return value
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(5)
 
+--- Converts an angle into its normalized form with pitch, yaw and roll between -180 and 180
 e2function angle angnorm(angle rv1)
 	return {(rv1[1] + 180) % 360 - 180,(rv1[2] + 180) % 360 - 180,(rv1[3] + 180) % 360 - 180}
 end
 
+--- Converts an angle into its normalized form with value between -180 and 180
 e2function number angnorm(rv1)
 	return (rv1 + 180) % 360 - 180
 end
 
 __e2setcost(1)
 
+--- Gets the pitch of the vector
 e2function number angle:pitch()
 	return this[1]
 end
 
+--- Gets the yaw of the vector
 e2function number angle:yaw()
 	return this[2]
 end
 
+--- Gets the roll of the vector
 e2function number angle:roll()
 	return this[3]
 end
 
 __e2setcost(2)
 
-// SET methods that returns angles
+--- Returns a new angle with modified pitch
 e2function angle angle:setPitch(rv2)
 	return { rv2, this[2], this[3] }
 end
 
+--- Returns a new angle with modified yaw
 e2function angle angle:setYaw(rv2)
 	return { this[1], rv2, this[3] }
 end
 
+--- Returns a new angle with modified roll
 e2function angle angle:setRoll(rv2)
 	return { this[1], this[2], rv2 }
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
 __e2setcost(5)
 
+--- Rounds the angles components
 e2function angle round(angle rv1)
 	return {
 		floor(rv1[1] + 0.5), 
@@ -227,6 +238,7 @@ e2function angle round(angle rv1)
 	}
 end
 
+--- Rounds the angles components with given decimal precision
 e2function angle round(angle rv1, decimals)
 	local shf = 10 ^ decimals
 	return {
@@ -236,6 +248,7 @@ e2function angle round(angle rv1, decimals)
 	}
 end
 
+--- Ceils the angles components
 e2function angle ceil(angle rv1)
 	return {
 		ceil(rv1[1]), 
@@ -244,6 +257,7 @@ e2function angle ceil(angle rv1)
 	}
 end
 
+--- Ceils the angles components with given decimal precision
 e2function angle ceil(angle rv1, decimals)
 	local shf = 10 ^ decimals
 	return {
@@ -253,6 +267,7 @@ e2function angle ceil(angle rv1, decimals)
 	}
 end
 
+--- Floors the angles components
 e2function angle floor(angle rv1)
 	return {
 		floor(rv1[1]), 
@@ -261,6 +276,7 @@ e2function angle floor(angle rv1)
 	}
 end
 
+--- Floors the angles components with given decimal precision
 e2function angle floor(angle rv1, decimals)
 	local shf = 10 ^ decimals
 	return {
@@ -270,7 +286,7 @@ e2function angle floor(angle rv1, decimals)
 	}
 end
 
-// Performs modulo on p,y,r separately
+--- Performs seperate modulo on the angles components with the given number
 e2function angle mod(angle rv1, rv2)
 	local p,y,r
 	if rv1[1] >= 0 then
@@ -285,7 +301,7 @@ e2function angle mod(angle rv1, rv2)
 	return {p, y, r}
 end
 
-// Modulo where divisors are defined as an angle
+--- Performs seperate modulo on the angles components with the second angles components
 e2function angle mod(angle rv1, angle rv2)
 	local p,y,r
 	if rv1[1] >= 0 then
@@ -300,7 +316,7 @@ e2function angle mod(angle rv1, angle rv2)
 	return {p, y, r}
 end
 
-// Clamp each p,y,r separately
+--- Clamp the angles components between given minimum and maximum numbers
 e2function angle clamp(angle rv1, rv2, rv3)
 	local p,y,r
 
@@ -319,7 +335,7 @@ e2function angle clamp(angle rv1, rv2, rv3)
 	return {p, y, r}
 end
 
-// Clamp according to limits defined by two min/max angles
+--- Clamp the angles components between given minimum and maximum angles
 e2function angle clamp(angle rv1, angle rv2, angle rv3)
 	local p,y,r
 
@@ -338,7 +354,7 @@ e2function angle clamp(angle rv1, angle rv2, angle rv3)
 	return {p, y, r}
 end
 
-// Mix two angles by a given proportion (between 0 and 1)
+--- Mix two angles components by a given proportion (between 0 and 1)
 e2function angle mix(angle rv1, angle rv2, rv3)
 	local p = rv1[1] * rv3 + rv2[1] * (1-rv3)
 	local y = rv1[2] * rv3 + rv2[2] * (1-rv3)
@@ -348,18 +364,19 @@ end
 
 __e2setcost(2)
 
-// Circular shift function: shiftr(  p,y,r ) = ( r,p,y )
+--- Circular shift function: shiftr(  p,y,r ) = ( r,p,y )
 e2function angle shiftR(angle rv1)
 	return {rv1[3], rv1[1], rv1[2]}
 end
 
+--- Circular shift function: shiftl(  p,y,r ) = ( y,r,p )
 e2function angle shiftL(angle rv1)
 	return {rv1[2], rv1[3], rv1[1]}
 end
 
 __e2setcost(5)
 
-// Returns 1 if the angle lies between (or is equal to) the min/max angles
+--- Returns 1 if the angle lies between (or is equal to) the min/max angles
 e2function normal inrange(angle rv1, angle rv2, angle rv3)
 	if rv1[1] < rv2[1] then return 0 end
 	if rv1[2] < rv2[2] then return 0 end
@@ -372,7 +389,7 @@ e2function normal inrange(angle rv1, angle rv2, angle rv3)
 	return 1
 end
 
-// Rotate an angle around a vector by the given number of degrees
+--- Rotate an angle around a vector by the given number of degrees
 e2function angle angle:rotateAroundAxis(vector axis, degrees)
 	local ang = Angle(this[1], this[2], this[3])
 	local vec = Vector(axis[1], axis[2], axis[3]):GetNormal()
@@ -381,32 +398,37 @@ e2function angle angle:rotateAroundAxis(vector axis, degrees)
 	return {ang.p, ang.y, ang.r}
 end
 
-// Convert the magnitude of the angle to radians
+--- Convert the components of the angle from degrees to radians
 e2function angle toRad(angle rv1)
 	return {rv1[1] * pi / 180, rv1[2] * pi / 180, rv1[3] * pi / 180}
 end
 
-// Convert the magnitude of the angle to degrees
+--- Convert the components of the angle from radians to degrees
 e2function angle toDeg(angle rv1)
 	return {rv1[1] * 180 / pi, rv1[2] * 180 / pi, rv1[3] * 180 / pi}
 end
 
-/******************************************************************************/
+--[[******************************************************************************]]--
 
+--- Gets the forward direction of the angle
 e2function vector angle:forward()
 	return Angle(this[1], this[2], this[3]):Forward()
 end
 
+--- Gets the right direction of the angle
 e2function vector angle:right()
 	return Angle(this[1], this[2], this[3]):Right()
 end
 
+--- Gets the upwards direction of the angle
 e2function vector angle:up()
 	return Angle(this[1], this[2], this[3]):Up()
 end
 
+--- Converts the angle to a string: "[pitch,yaw,roll]"
 e2function string toString(angle a)
 	return ("[%s,%s,%s]"):format(a[1],a[2],a[3])
 end
 
+--- Converts the angle to a string: "[pitch,yaw,roll]"
 e2function string angle:toString() = e2function string toString(angle a)

@@ -415,7 +415,7 @@ function e2_tostring_bone(b)
 	return string.format("%s:bone(%d)", tostring(ent), bone2index[b])
 end
 
---- Returns <b> formatted as a string. Returns "<code>(null)</code>" for invalid bones.
+--- Returns <b> formatted as a string. Returns "(null)" for invalid bones.
 e2function string toString(bone b)
 	local ent = isValidBone(b)
 	if not ent then return "(null)" end

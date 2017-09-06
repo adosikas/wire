@@ -13,7 +13,7 @@ local p_typename = "[a-z][a-z0-9]*"
 local p_typeid = "[a-z][a-z0-9]?[a-z0-9]?[a-z0-9]?[a-z0-9]?"
 local p_argname = "[a-zA-Z][a-zA-Z0-9]*"
 local p_funcname = "[a-z][a-zA-Z0-9]*"
-local p_func_operator = "[-a-zA-Z0-9+*/%%^=!><&|$_]*"
+local p_func_operator = "[-a-zA-Z0-9+*/%%^=!><&|$_%[%]]*"
 
 local function ltrim(s)
 	return string.match(s, "^%s*(.-)$")
@@ -27,39 +27,22 @@ local function trim(s)
 	return string.match(s, "^%s*(.-)%s*$")
 end
 
-local mess_with_args
+local function typeid_to_image(typeid)
+    return string.format("[[Type-%s.png|alt=%s]]", typeid:upper(), typename)
+end
 
-function mess_with_args(args, desc, thistype)
-	local args_referenced = string.match(desc, "<" .. p_argname .. ">")
+local function mess_with_args(args, desc)
 	local argtable, ellipses = e2_parse_args(args)
-	local indices = {}
-	if thistype ~= "" then indices[string.upper(e2_get_typeid(thistype))] = 2 end
-	args = ''
+	newargs = {}
 	for i, name in ipairs(argtable.argnames) do
-		local typeid = string.upper(argtable.typeids[i])
-
-		local index = ""
-		if args_referenced then
-			index = indices[typeid]
-			if index then
-				indices[typeid] = index + 1
-			else
-				index = ""
-				indices[typeid] = 2
-			end
-		end
-		local newname = typeid .. "<sub>" .. index .. "</sub>"
-		if index == "" then newname = typeid end
-
-		desc = desc:gsub("<" .. name .. ">", "''" .. newname .. "''")
-		if i ~= 1 then args = args .. "," end
-		args = args .. newname
+		local arg = typeid_to_image(argtable.typeids[i]) .. name
+		desc = desc:gsub("<" .. name .. ">", "*" .. arg .. "*")
+		table.insert(newargs,arg)
 	end
 	if ellipses then
-		if #argtable.argnames ~= 0 then args = args .. "," end
-		args = args .. "..."
+		table.insert(newargs,"...")
 	end
-	return args, desc
+	return table.concat(newargs, ", "), desc
 end
 
 local function e2doc(filename, outfile)
@@ -67,61 +50,56 @@ local function e2doc(filename, outfile)
 		outfile = string.match(filename, "^.*%.") .. "txt"
 	end
 	local current = {}
-	local output = { '====Commands====\n:{|style="background:#E6E6FA"\n!align="left" width="150"| Function\n!align="left" width="60"| Returns\n!align="left" width="1000"| Description\n' }
-	local insert_line = true
+	local output = { '|Function|Returns|Description|\n|:-|:-|:-|\n' }
+	local section_title = nil
 	for line in string.gmatch(readfile(filename), "%s*(.-)%s*\n") do
 		if line:sub(1, 3) == "---" then
 			if line:match("[^-%s]") then table.insert(current, ltrim(line:sub(4))) end
-		elseif line:sub(1, 3) == "///" then
-			table.insert(current, ltrim(line:sub(4)))
-		elseif line:sub(1, 12) == "--[[********" or line:sub(1, 9) == "/********" then
-			if line:find("^%-%-%[%[%*%*%*%*%*%*%*%*+%]%]%-%-$") or line:find("^/%*%*%*%*%*%*%*%*+/$") then
-				insert_line = true
+		elseif line:sub(1, 6) == "--[[--" then
+			if line:find("^%-%-%[%[%-%-.-%-%-%]%]%-%-$") then
+				section_title = line:match("^%-%-%[%[%-%-(.-)%-%-%]%]%-%-$")
 			end
+		elseif line:sub(1, 12) == "--[[********" then
+			if line:find("^%-%-%[%[%*%*%*%*%*%*%*%*+%]%]%-%-$") then
+				section_title = "DefaultSpacerTitle"
+		end
 		elseif line:sub(1, 10) == "e2function" then
 			local ret, thistype, colon, name, args = line:match("e2function%s+(" .. p_typename .. ")%s+([a-z0-9]-)%s*(:?)%s*(" .. p_func_operator .. ")%(([^)]*)%)")
-			if thistype ~= "" and colon == "" then error("E2doc syntax error: Function names may not start with a number.", 0) end
-			if thistype == "" and colon ~= "" then error("E2doc syntax error: No type for 'this' given.", 0) end
-			if thistype:sub(1, 1):find("[0-9]") then error("E2doc syntax error: Type names may not start with a number.", 0) end
+			if thistype ~= nil and colon == nil then error("E2doc syntax error: Function names may not start with a number.", 0) end
+			if thistype == nil and colon ~= nil then error("E2doc syntax error: No type for 'this' given.", 0) end
+			if thistype ~= nil and thistype:sub(1, 1):find("[0-9]") then error("E2doc syntax error: Type names may not start with a number.", 0) end
 
-			desc = table.concat(current, "<br />")
+			desc = table.concat(current, "  \n")
 			current = {}
 
 			if name:sub(1, 8) ~= "operator" and not desc:match("@nodoc") then
-				if insert_line then
-					table.insert(output, '|-\n| bgcolor="SteelBlue" |  || bgcolor="SteelBlue" |  || bgcolor="SteelBlue" | \n')
-					insert_line = false
+				if section_title then
+					table.insert(output, '|**'..section_title..'**|||')
+					section_title = nil
 				end
-				args, desc = mess_with_args(args, desc, thistype)
 
-				if ret == "void" then
+				args, desc = mess_with_args(args, desc)
+
+				if ret==nil or ret == "void" then
 					ret = ""
 				else
-					ret = string.upper(e2_get_typeid(ret))
+					ret = typeid_to_image(e2_get_typeid(ret))
 				end
 
 				if thistype ~= "" then
-					thistype = string.upper(e2_get_typeid(thistype))
-					desc = desc:gsub("<this>", "''" .. thistype .. "''")
-					thistype = thistype .. ":"
+					thistype = typeid_to_image(e2_get_typeid(thistype)) .. ":"
 				end
-				table.insert(output, string.format("|-\n|%s%s(%s) || %s || ", thistype, name, args, ret))
-				--desc = desc:gsub("<([^<>]+)>", "''%1''")
-				table.insert(output, desc)
-				table.insert(output, "\n")
+				table.insert(output, string.format("| %s%s(%s) | %s | %s |\n", thistype, name, args, ret, desc))
 			end
 		end
 	end -- for line
-	output = table.concat(output) .. "|}\n"
-	print(output)
+	output = table.concat(output)
+	-- print(output)
 	writefile(outfile, output)
 end
 
--- Add a client-side "e2doc" console command
+-- Add a server-side "e2doc" console command
 if SERVER then
-	AddCSLuaFile()
-	e2doc = nil
-elseif CLIENT then
 	concommand.Add("e2doc",
 		function(player, command, args)
 			if not file.IsDir("e2doc", "DATA") then file.CreateDir("e2doc") end

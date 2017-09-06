@@ -28,16 +28,16 @@ local function trim(s)
 end
 
 local function typeid_to_image(typeid)
-    return string.format("[[Type-%s.png|alt=%s]]", typeid:upper(), typename)
+    return string.format("[[Type-%s.png|alt=%s]]", typeid:upper(), E2Lib.typeName(typeid))
 end
 
 local function mess_with_args(args, desc)
 	local argtable, ellipses = e2_parse_args(args)
 	newargs = {}
 	for i, name in ipairs(argtable.argnames) do
-		local arg = typeid_to_image(argtable.typeids[i]) .. name
-		desc = desc:gsub("<" .. name .. ">", "*" .. arg .. "*")
-		table.insert(newargs,arg)
+		local arg_img = typeid_to_image(argtable.typeids[i])
+		desc = desc:gsub("<" .. name .. ">", string.format("%s `%s`", arg_img, name)) -- code tags for argument in descriptions
+		table.insert(newargs,string.format("`%s `%s", arg_img, name)) -- lift code tags for image in signature
 	end
 	if ellipses then
 		table.insert(newargs,"...")
@@ -86,10 +86,12 @@ local function e2doc(filename, outfile)
 					ret = typeid_to_image(e2_get_typeid(ret))
 				end
 
-				if thistype ~= "" then
-					thistype = typeid_to_image(e2_get_typeid(thistype)) .. ":"
+				if thistype == "" then
+					thistype = "`"
+				else
+					thistype = typeid_to_image(e2_get_typeid(thistype)) .. "`:"
 				end
-				table.insert(output, string.format("| %s%s(%s) | %s | %s |\n", thistype, name, args, ret, desc))
+				table.insert(output, string.format("| %s%s(%s)` | %s | %s |\n", thistype, name, args, ret, desc))
 			end
 		end
 	end -- for line

@@ -48,10 +48,9 @@ registerType("array", "r", {},
 	end
 )
 
---------------------------------------------------------------------------------
--- Array(...)
--- Constructs and returns an array with the given values as elements. If you specify values that are not supported by the array data type, they are skipped
---------------------------------------------------------------------------------
+--[[--Constructors--]]--
+
+--- Constructs and returns an array with the given values as elements. If you specify values that are not supported by the array data type, they are skipped
 __e2setcost(1)
 e2function array array(...)
 	local ret = {...}
@@ -83,9 +82,9 @@ registerOperator( "kvarray", "", "r", function( self, args )
 	return ret
 end)
 
---------------------------------------------------------------------------------
+--[[--Operators--]]--
+
 -- = operator
---------------------------------------------------------------------------------
 registerOperator("ass", "r", "r", function(self, args)
 	local lhs, op2, scope = args[2], args[3], args[4]
 	local      rhs = op2[1](self, op2)
@@ -110,16 +109,12 @@ end)
 
 
 
---------------------------------------------------------------------------------
 -- IS operator
---------------------------------------------------------------------------------
 e2function number operator_is(array arr)
 	return istable(arr) and 1 or 0
 end
 
---------------------------------------------------------------------------------
 -- Looped functions and operators
---------------------------------------------------------------------------------
 registerCallback( "postinit", function()
 	local getf, setf
 	for k,v in pairs( wire_expression_types ) do
@@ -300,79 +295,96 @@ registerCallback( "postinit", function()
 	end
 end)
 
---------------------------------------------------------------------------------
+--[[--Adding and removing--]]--
+
 -- Pop
--- Removes the last entry in the array
---------------------------------------------------------------------------------
+--- Removes the last entry in the array
 __e2setcost(15)
 e2function void array:pop()
 	table_remove( this )
 	self.GlobalScope.vclk[this] = true
 end
 
---------------------------------------------------------------------------------
 -- Remove
--- Removes the specified entry in the array
---------------------------------------------------------------------------------
+--- Removes the entry at <index> in the array
 __e2setcost(15)
 e2function void array:remove( index )
 	table_remove( this, index )
 	self.GlobalScope.vclk[this] = true
 end
 
---------------------------------------------------------------------------------
--- Force remove
--- Forcibly removes the value from the array by setting it to nil
--- Does not shift larger indexes down to fill the hole
---------------------------------------------------------------------------------
+-- Unset
+--- Forcibly removes the entry at <index> from the array by setting it to nil
+--- Does not shift larger indexes down to fill the hole
 e2function void array:unset( index )
 	if this[index] == nil then return end
 	this[index] = nil
 	self.GlobalScope.vclk[this] = true
 end
 
---------------------------------------------------------------------------------
 -- Shift
--- Removes the first entry in the array
---------------------------------------------------------------------------------
+--- Removes the first entry in the array, the following entries will move forward to fill the gap
 __e2setcost(15)
 e2function void array:shift()
 	table_remove( this, 1 )
 	self.GlobalScope.vclk[this] = true
 end
 
---------------------------------------------------------------------------------
--- Exists
--- Returns 1 if any value exists at the specified index, 0 if not
---------------------------------------------------------------------------------
-__e2setcost(1)
-e2function number array:exists( index )
-	return this[index] != nil and 1 or 0
-end
-
---------------------------------------------------------------------------------
--- Count
--- Returns the number of entries in the array
---------------------------------------------------------------------------------
-__e2setcost(5)
-e2function number array:count()
-	return #this
-end
-
---------------------------------------------------------------------------------
 -- Clear
--- Empties the array
---------------------------------------------------------------------------------
+--- Empties the array
 __e2setcost(1)
 e2function void array:clear()
 	self.prf = self.prf + #this / 3
 	table.Empty(this)
 end
 
---------------------------------------------------------------------------------
+-- Add
+--- Returns an array which adds <other> to the end of this array
+__e2setcost(1)
+e2function array array:add( array other )
+	if (!next(this) and !next(other)) then return {} end -- Both of them are empty
+	local ret = {}
+	for i=1,#this do
+		ret[i] = this[i]
+	end
+	for i=1,#other do
+		ret[#ret+1] = other[i]
+	end
+	self.prf = self.prf + #ret / 3
+	return ret
+end
+
+-- Merge
+--- Returns an array which merges <other> and this array. Identical indexes will be overwritten by <other>
+__e2setcost(1)
+e2function array array:merge( array other )
+	if (!next(this) and !next(other)) then return {} end -- Both of them are empty
+	local ret = {}
+	for i=1,math.max(#this,#other) do
+		ret[i] = other[i] or this[i]
+	end
+	self.prf = self.prf + #ret / 3
+	return ret
+end
+
+--[[--Utilities--]]--
+
+-- Exists
+--- Returns 1 if any value exists at the specified <index>, 0 if not
+__e2setcost(1)
+e2function number array:exists( index )
+	return this[index] != nil and 1 or 0
+end
+
+-- Count
+--- Returns the number of entries in the array
+__e2setcost(5)
+e2function number array:count()
+	return #this
+end
+
 -- Clone
--- Returns a copy of the array
---------------------------------------------------------------------------------
+--- Returns a copy of the array, so changes in one array don't affect the other
 __e2setcost(1)
 e2function array array:clone()
 	local ret = {}
@@ -383,10 +395,17 @@ e2function array array:clone()
 	return ret
 end
 
---------------------------------------------------------------------------------
+-- Id
+--- Returns a string identifier representing the array
+__e2setcost(1)
+e2function string array:id()
+	return tostring(this)
+end
+
+--[[--Array calculation--]]--
+
 -- Sum
--- Returns the sum of all numerical values in the array
---------------------------------------------------------------------------------
+--- Returns the sum of all numerical values in the array
 __e2setcost(1)
 e2function number array:sum()
 	local ret = 0
@@ -399,10 +418,8 @@ e2function number array:sum()
 	return ret
 end
 
---------------------------------------------------------------------------------
 -- Average
--- Returns the average of all numerical values in the array
---------------------------------------------------------------------------------
+--- Returns the average of all numerical values in the array
 __e2setcost(1)
 e2function number array:average()
 	local ret = 0
@@ -415,10 +432,8 @@ e2function number array:average()
 	return ret / indexes
 end
 
---------------------------------------------------------------------------------
 -- Min
--- Returns the smallest value in the array
---------------------------------------------------------------------------------
+--- Returns the smallest value in the array
 __e2setcost(1)
 e2function number array:min()
 	local num
@@ -434,10 +449,8 @@ e2function number array:min()
 	return num or 0
 end
 
---------------------------------------------------------------------------------
 -- MinIndex
--- Returns the index of the smallest value in the array
---------------------------------------------------------------------------------
+--- Returns the index of the smallest value in the array
 __e2setcost(1)
 e2function number array:minIndex()
 	local num = nil
@@ -455,10 +468,8 @@ e2function number array:minIndex()
 	return index or 0
 end
 
---------------------------------------------------------------------------------
 -- Max
--- Returns the largest value in the array
---------------------------------------------------------------------------------
+--- Returns the largest value in the array
 __e2setcost(1)
 e2function number array:max()
 	local num
@@ -474,10 +485,8 @@ e2function number array:max()
 	return num or 0
 end
 
---------------------------------------------------------------------------------
 -- MaxIndex
--- Returns the index of the largest value in the array
---------------------------------------------------------------------------------
+--- Returns the index of the largest value in the array
 __e2setcost(1)
 e2function number array:maxIndex()
 	local num = nil
@@ -495,10 +504,7 @@ e2function number array:maxIndex()
 	return index or 0
 end
 
---------------------------------------------------------------------------------
--- Concat
--- Concatenates the values of the array
---------------------------------------------------------------------------------
+--[[--Concat--]]--
 __e2setcost(1)
 local luaconcat = table.concat
 local clamp = math.Clamp
@@ -517,69 +523,34 @@ local function concat( tab, delimeter, startindex, endindex )
 	return luaconcat( ret, delimeter )
 end
 
+-- Concat
+--- Concatenates the values of the array without a delimiter
 e2function string array:concat()
 	self.prf = self.prf + #this/3
 	return concat(this)
 end
+--- Concatenates the values of the array with a <delimiter>
 e2function string array:concat(string delimiter)
 	self.prf = self.prf + #this/3
 	return concat(this,delimiter)
 end
+--- Concatenates the values of the array with a <delimiter>, starting at <startindex>
 e2function string array:concat(string delimiter, startindex)
 	self.prf = self.prf + #this/3
 	return concat(this,delimiter,startindex)
 end
+--- Concatenates the values of the array with a <delimiter>, between <startindex> and <endindex>
 e2function string array:concat(string delimiter, startindex, endindex)
 	self.prf = self.prf + #this/3
 	return concat(this,delimiter,startindex,endindex)
 end
+--- Concatenates the values of the array without a delimiter, starting at <startindex>
 e2function string array:concat(startindex)
 	self.prf = self.prf + #this/3
 	return concat(this,"",startindex,endindex)
 end
+--- Concatenates the values of the array without a delimiter, between <startindex> and <endindex>
 e2function string array:concat(startindex,endindex)
 	self.prf = self.prf + #this/3
 	return concat(this,"",startindex,endindex)
-end
-
---------------------------------------------------------------------------------
--- Id
--- Returns a string identifier representing the array
---------------------------------------------------------------------------------
-__e2setcost(1)
-e2function string array:id()
-	return tostring(this)
-end
-
---------------------------------------------------------------------------------
--- Add
--- Add the contents of the specified array to the end of 'this'
---------------------------------------------------------------------------------
-__e2setcost(1)
-e2function array array:add( array other )
-	if (!next(this) and !next(other)) then return {} end -- Both of them are empty
-	local ret = {}
-	for i=1,#this do
-		ret[i] = this[i]
-	end
-	for i=1,#other do
-		ret[#ret+1] = other[i]
-	end
-	self.prf = self.prf + #ret / 3
-	return ret
-end
-
---------------------------------------------------------------------------------
--- Merge
--- Merges the two tables. Identical indexes will be overwritten by 'other'
---------------------------------------------------------------------------------
-__e2setcost(1)
-e2function array array:merge( array other )
-	if (!next(this) and !next(other)) then return {} end -- Both of them are empty
-	local ret = {}
-	for i=1,math.max(#this,#other) do
-		ret[i] = other[i] or this[i]
-	end
-	self.prf = self.prf + #ret / 3
-	return ret
 end

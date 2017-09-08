@@ -25,8 +25,7 @@ local function ent1or2(ent,con,num)
 	return con.Ent1
 end
 
-/******************************************************************************/
-
+--[[--Constraint Info--]]--
 
 __e2setcost(20)
 
@@ -44,7 +43,7 @@ local function GetAllConstrainedEntities( ent, ResultTable )
 
 	return ResultTable
 end
---- Returns an '''array''' containing all entities directly or indirectly constrained to <this>, except <this> itself.
+--- Returns an array containing all entities directly or indirectly constrained to <this>, except <this> itself.
 e2function array entity:getConstraints()
 	if not IsValid(this) then return {} end
 	if not constraint.HasConstraints(this) then return {} end
@@ -94,6 +93,8 @@ e2function number entity:isConstrained()
 	return 1
 end
 
+--[[--Weld--]]--
+
 --- Returns the first entity <this> was welded to.
 e2function entity entity:isWeldedTo()
 	if not IsValid(this) then return nil end
@@ -109,6 +110,8 @@ e2function entity entity:isWeldedTo(index)
 
 	return ent1or2(this,constraint.FindConstraints(this, "Weld"), math.floor(index))
 end
+
+--[[--Any Constraint--]]--
 
 --- Returns the first entity <this> was constrained to.
 e2function entity entity:isConstrainedTo()
@@ -142,13 +145,15 @@ e2function entity entity:isConstrainedTo(string constraintType, index)
 	return ent1or2(this,constraint.FindConstraints(this, caps(constraintType)), math.floor(index))
 end
 
---- Returns the '''entity''' <this> is parented to.
+--[[--Parent--]]--
+
+--- Returns the entity <this> is parented to.
 e2function entity entity:parent()
 	if not IsValid(this) then return nil end
 	return this:GetParent()
 end
 
---- Returns the '''bone''' <this> is parented to.
+--- Returns the bone <this> is parented to.
 e2function bone entity:parentBone()
 	if not IsValid(this) then return nil end
 
@@ -160,7 +165,7 @@ end
 
 __e2setcost(20)
 
---- Returns an '''array''' containing all the children of the entity - that is, every entity whose parent is this entity.
+--- Returns an array containing all the children of the entity - that is, every entity whose parent is this entity.
 e2function array entity:children()
 	if not IsValid(this) then return {} end
 

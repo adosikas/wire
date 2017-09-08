@@ -29,12 +29,16 @@ end
 
 __e2setcost(5)
 
+--[[--E2 Owner--]]--
+
+--- Runs <command>
 e2function number concmd(string command)
 	if not validConCmd(self, command) then return 0 end
 	self.player:ConCommand(command:gsub("%%", "%%%%"))
 	return 1
 end
 
+--- Gets the string value of <cvar>
 e2function string convar(string cvar)
 	if not validConCmd(self, cvar) then return "" end
 	local ret = self.player:GetInfo(cvar)
@@ -42,6 +46,7 @@ e2function string convar(string cvar)
 	return ret
 end
 
+--- Gets the numeric value of <cvar>
 e2function number convarnum(string cvar)
 	if not validConCmd(self, cvar) then return 0 end
 	local ret = self.player:GetInfoNum(cvar, 0)
@@ -49,11 +54,15 @@ e2function number convarnum(string cvar)
 	return ret
 end
 
+--[[--Serverside--]]--
+
+--- Queries "sbox_max_{typename}", or wire_holograms_max when querying for "wire_holograms"
 e2function number maxOfType(string typename)
 	if typename == "wire_holograms" then return GetConVarNumber("wire_holograms_max") or 0 end
 	return GetConVarNumber("sbox_max"..typename) or 0
 end
 
+--- Queries sbox_plpldamage
 e2function number playerDamage()
 	local ret = GetConVarNumber("sbox_plpldamage") or 0
 	return ret ~= 0 and 1 or 0

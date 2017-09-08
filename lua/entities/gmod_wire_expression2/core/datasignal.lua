@@ -308,9 +308,11 @@ registerCallback("postinit",function()
 	end -- loop
 end) -- postinit
 
+--[[--Groups and Scope--]]--
+
 __e2setcost(10)
 
--- Leave all groups
+--- Leave all groups
 e2function void dsClearGroups()
 	for i=1,#self.data.datasignal.groups do
 		local name = self.data.datasignal.groups[i]
@@ -326,86 +328,88 @@ e2function void dsClearGroups()
 	self.data.datasignal.groups = {}
 end
 
--- Join group
+--- Join group <groupname>
 e2function void dsJoinGroup( string groupname )
 	joinGroup( self, groupname )
 end
 
--- Leave group
+--- Leave group <groupname>
 e2function void dsLeaveGroup( string groupname )
 	leaveGroup( self, groupname )
 end
 
 __e2setcost(5)
 
--- Get all groups in an array
+--- Get all joined groups in an array
 e2function array dsGetGroups()
 	return self.data.datasignal.groups or {}
 end
 
--- 0 = only you, 1 = only pp friends, 2 = everyone
+--- Set <scope> 0 = deafult, only you, 1 = only pp friends, 2 = everyone
 e2function void dsSetScope( number scope )
 	self.data.datasignal.scope = c(f(scope),0,2)
 end
 
--- Get current scope
+--- Get current scope
 e2function number dsGetScope()
 	return self.data.datasignal.scope
 end
 
+__e2setcost(20)
+
+--- Get all E2s which would have received a signal if you had sent it to this group and the E2s scope
+e2function array dsProbe( string groupname )
+	return probeGroup( self.entity, self.data.datasignal.scope, groupname )
+end
+
+--- Get all E2s which would have received a signal if you had sent it to this group and scope
+e2function array dsProbe( string groupname, number scope )
+	return probeGroup( self.entity, c(f(scope),0,2), groupname )
+end
+
+--[[--Incoming Signal--]]--
+
 __e2setcost(1)
 
--- Check if the current execution was caused by ANY datasignal
+--- Check if the current execution was caused by ANY datasignal
 e2function number dsClk()
 	return currentsignal ~= nil and 1 or 0
 end
 
--- Check if the current execution was caused by a datasignal named <name>
+--- Check if the current execution was caused by a datasignal named <name>
 e2function number dsClk( string name )
 	if not currentsignal then return 0 end
 	return currentsignal.name == name and 1 or 0
 end
 
--- Returns the name of the current signal
+--- Returns the name of the current signal
 e2function string dsClkName()
 	if not currentsignal then return "" end
 	return currentsignal.name
 end
 
--- Get the type of the current data
+--- Get the type of the current data
 e2function string dsGetType()
 	if not currentsignal then return "" end
 	return currentsignal.vartype
 end
 
--- Get the E2 that sent the signal
+--- Get the E2 that sent the signal
 e2function entity dsGetSender()
 	if not currentsignal then return end
 	return currentsignal.from
 end
 
--- Get the group which the signal was sent to
+--- Get the group which the signal was sent to
 e2function string dsGetGroup()
 	if not currentsignal then return "" end
 	return currentsignal.groupname
 end
 
--- Get the hash of the sending E2
+--- Get the hash of the sending E2
 e2function number dsGetHash()
 	if not currentsignal then return "" end
 	return currentsignal.hash
-end
-
-__e2setcost(20)
-
--- Get all E2s which would have received a signal if you had sent it to this group and the E2s scope
-e2function array dsProbe( string groupname )
-	return probeGroup( self.entity, self.data.datasignal.scope, groupname )
-end
-
--- Get all E2s which would have received a signal if you had sent it to this group and scope
-e2function array dsProbe( string groupname, number scope )
-	return probeGroup( self.entity, c(f(scope),0,2), groupname )
 end
 
 

@@ -211,8 +211,7 @@ e2function complex operator^(complex lhs, number rhs)
 	return cexp(rhs*l[1], rhs*l[2])
 end
 
---[[******************************************************************************]]--
--- constructors
+--[[--Constructors--]]--
 
 --- Returns complex zero
 e2function complex comp()
@@ -239,8 +238,7 @@ e2function complex i(b)
 	return {0, b}
 end
 
---[[******************************************************************************]]--
--- helper functions
+--[[--Helper Functions--]]--
 
 --- Returns the absolute value of <z>
 e2function number abs(complex z)
@@ -272,8 +270,7 @@ e2function number imag(complex z)
 	return z[2]
 end
 
---[[******************************************************************************]]--
--- exp and logarithms
+--[[Exp, Logarithm and Root]]--
 
 --- Raises Euler's constant e to the power of <z>
 e2function complex exp(complex z)
@@ -308,8 +305,6 @@ e2function complex log10(complex z)
 	return {l[1]/log(10), l[2]/log(10)}
 end
 
---[[******************************************************************************]]--
-
 --- Calculates the square root of <z>
 e2function complex sqrt(complex z)
 	local l = clog(z[1], z[2])
@@ -325,8 +320,7 @@ e2function complex csqrt(n)
 	end
 end
 
---[[******************************************************************************]]--
--- trigonometric functions
+--[[Trigonometric Functions]]--
 
 __e2setcost(3)
 
@@ -400,8 +394,7 @@ e2function number atan2(complex z)
 	return atan2(z[2], z[1])
 end
 
---[[******************************************************************************]]--
--- hyperbolic functions
+--[[Hyperbolic Functions]]--
 
 __e2setcost(4)
 

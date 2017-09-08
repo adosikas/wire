@@ -237,22 +237,45 @@ registerOperator("or", "nn", "n", function(self, args)
 	return rv2 ~= 0 and 1 or 0
 end)
 
---------------------------------------------------------------------------------
+--[[--Triggers--]]--
 
 __e2setcost(1) -- approximation
 
+--- Returns 1 if the current execution was trigged by placing the E2
 e2function number first()
 	return self.entity.first and 1 or 0
 end
 
+--- Returns 1 if the current execution was trigged by spawning a dupe containing the E2
 e2function number duped()
 	return self.entity.duped and 1 or 0
 end
 
+-- dupefinished()
+-- Made by Divran
+local function dupefinished( TimedPasteData, TimedPasteDataCurrent )
+	for k,v in pairs( TimedPasteData[TimedPasteDataCurrent].CreatedEntities ) do
+		if (isentity(v) and v:IsValid() and v:GetClass() == "gmod_wire_expression2") then
+			v.dupefinished = true
+			v:Execute()
+			v.dupefinished = nil
+		end
+	end
+end
+hook.Add("AdvDupe_FinishPasting", "E2_dupefinished", dupefinished )
+
+--- Returns 1 if the current execution was trigged by completion of a dupe spawn containing the E2
+--- Normal dupes do not trigger this, but Advanced Duplicator 1 & 2 do.
+e2function number dupefinished()
+	return self.entity.dupefinished and 1 or 0
+end
+
+--- Returns 1 if the current execution was trigged by a wire input changing value
 e2function number inputClk()
 	return self.triggerinput and 1 or 0
 end
 
+--- Returns the name of the wire input that triggered the current execution
 e2function string inputClkName()
 	return self.triggerinput or ""
 end
@@ -272,27 +295,10 @@ registerCallback("destruct", function(self)
 	self.data.last = false
 end)
 
---- Returns 1 if it is being called on the last execution of the expression gate before it is removed or reset. This execution must be requested with the runOnLast(1) command.
+--- Returns 1 if it is being called on the last execution of the expression gate before it is removed or reset.
+--- This execution must be requested with the runOnLast(1) command.
 e2function number last()
 	return self.data.last and 1 or 0
-end
-
--- dupefinished()
--- Made by Divran
-
-local function dupefinished( TimedPasteData, TimedPasteDataCurrent )
-	for k,v in pairs( TimedPasteData[TimedPasteDataCurrent].CreatedEntities ) do
-		if (isentity(v) and v:IsValid() and v:GetClass() == "gmod_wire_expression2") then
-			v.dupefinished = true
-			v:Execute()
-			v.dupefinished = nil
-		end
-	end
-end
-hook.Add("AdvDupe_FinishPasting", "E2_dupefinished", dupefinished )
-
-e2function number dupefinished()
-	return self.entity.dupefinished and 1 or 0
 end
 
 --- Returns 1 if this is the last() execution and caused by the entity being removed.
@@ -306,22 +312,23 @@ e2function void runOnLast(activate)
 	self.data.runOnLast = activate ~= 0
 end
 
---------------------------------------------------------------------------------
+--[[--Control--]]--
 
 __e2setcost(2) -- approximation
 
+--- Immediately exit the current execution. Further triggers will work as intended
 e2function void exit()
 	error("exit", 0)
 end
 
-e2function void error( string reason )
-	error(reason, 2)
+--- Throws an error <message> and completely halt the E2
+e2function void error( string message )
+	error(message, 2)
 end
-
---------------------------------------------------------------------------------
 
 __e2setcost(100) -- approximation
 
+--- Completely resets the E2, causing it to behave as freshly spawned
 e2function void reset()
 	if self.data.last or self.entity.first then error("exit", 0) end
 
@@ -348,7 +355,7 @@ registerCallback("postinit", function()
 	end)
 end)
 
---------------------------------------------------------------------------------
+--[[--Performance Monitoring--]]--
 
 local floor  = math.floor
 local ceil   = math.ceil
@@ -356,29 +363,34 @@ local round  = math.Round
 
 __e2setcost(1) -- approximation
 
+--- Returns the average ops used
 e2function number ops()
 	return round(self.prfbench)
 end
 
+--- Returns the average ops used by <entity>
 e2function number entity:ops()
 	if not IsValid(this) or this:GetClass() ~= "gmod_wire_expression2" or not this.context then return 0 end
 	return round(this.context.prfbench)
 end
 
+--- Returns the currently used ops
 e2function number opcounter()
 	return ceil(self.prf + self.prfcount)
 end
 
+--- Returns the currently used cputime
 e2function number cpuUsage()
 	return self.timebench
 end
 
+--- Returns the currently used cputime by <entity>
 e2function number entity:cpuUsage()
 	if not IsValid(this) or this:GetClass() ~= "gmod_wire_expression2" or not this.context then return 0 end
 	return this.context.timebench
 end
 
---- If used as a while loop condition, stabilizes the expression around <maxexceed> hardquota used.
+--- If used as a while loop condition, stabilizes the expression around 95% of hardquota used.
 e2function number perf()
 	if self.prf >= e2_tickquota*0.95-200 then return 0 end
 	if self.prf + self.prfcount >= e2_hardquota then return 0 end
@@ -386,6 +398,7 @@ e2function number perf()
 	return 1
 end
 
+--- If used as a while loop condition, stabilizes the expression around <n> (1 = 100%) of hardquota used.
 e2function number perf(number n)
 	n = math.Clamp(n, 0, 100)
 	if self.prf >= e2_tickquota*n*0.01 then return 0 end
@@ -398,6 +411,7 @@ e2function number perf(number n)
 	return 1
 end
 
+--- Returns the currently remaining ops until softqouta
 e2function number minquota()
 	if self.prf < e2_softquota then
 		return floor(e2_softquota - self.prf)
@@ -406,6 +420,7 @@ e2function number minquota()
 	end
 end
 
+--- Returns the currently remaining ops until hardquota
 e2function number maxquota()
 	if self.prf < e2_tickquota then
 		local tickquota = e2_tickquota - self.prf
@@ -421,10 +436,12 @@ e2function number maxquota()
 	end
 end
 
+--- Returns the softquota limit
 e2function number softQuota()
 	return e2_softquota
 end
 
+--- Returns the hardquota limit
 e2function number hardQuota()
 	return e2_hardquota
 end

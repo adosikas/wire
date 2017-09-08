@@ -53,7 +53,7 @@ local function e2doc(filename, outfile)
 	local output = { '|Function|Returns|Description|\n|:-|:-|:-|\n' }
 	local section_title = nil
 	for line in string.gmatch(readfile(filename), "%s*(.-)%s*\n") do
-		if line:sub(1, 3) == "---" then
+		if line:sub(1, 4) == "--- " then
 			if line:match("[^-%s]") then table.insert(current, ltrim(line:sub(4))) end
 		elseif line:sub(1, 6) == "--[[--" then
 			if line:find("^%-%-%[%[%-%-.-%-%-%]%]%-%-$") then

@@ -45,7 +45,7 @@ hook.Add("EntityRemoved","Exp2ChatPlayerDisconnect", function(ply)
 	TextList[ply:EntIndex()] = nil
 end)
 
---[[************************************************************************]]--
+--[[--Trigger--]]--
 __e2setcost(3)
 
 --- If set to 0, the chip will no longer run on chat events, otherwise it makes this chip execute when someone chats. Only needs to be called once, not in every execution
@@ -74,7 +74,7 @@ e2function void hideChat(hide)
 	chipHideChat = hide ~= 0
 end
 
---[[************************************************************************]]--
+--[[--Message Information--]]--
 
 --- Returns the last player to speak.
 e2function entity lastSpoke()

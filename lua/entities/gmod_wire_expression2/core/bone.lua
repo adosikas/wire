@@ -79,7 +79,7 @@ registerType("bone", "b", nil,
 	end
 )
 
---[[************************************************************************]]--
+--[[--Operators--]]--
 
 __e2setcost(1)
 
@@ -107,7 +107,7 @@ e2function number operator!=(bone lhs, bone rhs)
 	if lhs ~= rhs then return 1 else return 0 end
 end
 
---[[************************************************************************]]--
+--[[--Bones and Entities--]]--
 __e2setcost(3)
 
 --- Returns <this>'s <index>th bone.
@@ -137,11 +137,6 @@ end
 
 __e2setcost(1)
 
---- Returns an invalid bone.
-e2function bone nobone()
-	return nil
-end
-
 --- Returns the entity <this> belongs to
 e2function entity bone:entity()
 	return isValidBone(this)
@@ -160,12 +155,63 @@ e2function number bone:index()
 	return bone2index[this] or -1
 end
 
---[[************************************************************************]]--
+--- Returns an invalid bone.
+e2function bone nobone()
+	return nil
+end
+
+--[[--Bone Information--]]--
 
 --- Returns <this>'s position.
 e2function vector bone:pos()
 	if not isValidBone(this) then return {0, 0, 0} end
 	return this:GetPos()
+end
+
+--- Transforms <pos> from local coordinates (as seen from <this>) to world coordinates.
+e2function vector bone:toWorld(vector pos)
+	if not isValidBone(this) then return {0, 0, 0} end
+	return this:LocalToWorld(Vector(pos[1],pos[2],pos[3]))
+end
+
+--- Transforms <pos> from world coordinates to local coordinates (as seen from <this>).
+e2function vector bone:toLocal(vector pos)
+	if not isValidBone(this) then return {0, 0, 0} end
+	return this:WorldToLocal(Vector(pos[1],pos[2],pos[3]))
+end
+
+--- Returns <this>'s velocity.
+e2function vector bone:vel()
+	if not isValidBone(this) then return {0, 0, 0} end
+	return this:GetVelocity()
+end
+
+--- Returns <this>'s velocity in local coordinates.
+e2function vector bone:velL()
+	if not isValidBone(this) then return {0, 0, 0} end
+	return this:WorldtoLocal(this:GetVelocity() + this:GetPos())
+end
+
+--[[************************************************************************]]--
+
+--- Returns <this>'s pitch, yaw and roll angles.
+e2function angle bone:angles()
+	if not isValidBone(this) then return {0, 0, 0} end
+	local ang = this:GetAngles()
+	return { ang.p, ang.y, ang.r }
+end
+
+--- Returns <this>'s angular velocity.
+e2function angle bone:angVel()
+	if not isValidBone(this) then return {0, 0, 0} end
+	local vec = this:GetAngleVelocity()
+	return { vec.y, vec.z, vec.x }
+end
+
+--- Returns a vector describing rotation axis, magnitude and sense given as the vector's direction, magnitude and orientation.
+e2function vector bone:angVelVector()
+	if not isValidBone(this) then return {0, 0, 0} end
+	return this:GetAngleVelocity()
 end
 
 --- Returns a vector describing <this>'s forward direction.
@@ -185,56 +231,6 @@ e2function vector bone:up()
 	if not isValidBone(this) then return {0, 0, 0} end
 	return this:LocalToWorld(Vector(0,0,1))-this:GetPos()
 end
-
---- Returns <this>'s velocity.
-e2function vector bone:vel()
-	if not isValidBone(this) then return {0, 0, 0} end
-	return this:GetVelocity()
-end
-
---- Returns <this>'s velocity in local coordinates.
-e2function vector bone:velL()
-	if not isValidBone(this) then return {0, 0, 0} end
-	return this:WorldtoLocal(this:GetVelocity() + this:GetPos())
-end
-
---[[************************************************************************]]--
-
---- Transforms <pos> from local coordinates (as seen from <this>) to world coordinates.
-e2function vector bone:toWorld(vector pos)
-	if not isValidBone(this) then return {0, 0, 0} end
-	return this:LocalToWorld(Vector(pos[1],pos[2],pos[3]))
-end
-
---- Transforms <pos> from world coordinates to local coordinates (as seen from <this>).
-e2function vector bone:toLocal(vector pos)
-	if not isValidBone(this) then return {0, 0, 0} end
-	return this:WorldToLocal(Vector(pos[1],pos[2],pos[3]))
-end
-
---[[************************************************************************]]--
-
---- Returns <this>'s angular velocity.
-e2function angle bone:angVel()
-	if not isValidBone(this) then return {0, 0, 0} end
-	local vec = this:GetAngleVelocity()
-	return { vec.y, vec.z, vec.x }
-end
-
---- Returns a vector describing rotation axis, magnitude and sense given as the vector's direction, magnitude and orientation.
-e2function vector bone:angVelVector()
-	if not isValidBone(this) then return {0, 0, 0} end
-	return this:GetAngleVelocity()
-end
-
---- Returns <this>'s pitch, yaw and roll angles.
-e2function angle bone:angles()
-	if not isValidBone(this) then return {0, 0, 0} end
-	local ang = this:GetAngles()
-	return { ang.p, ang.y, ang.r }
-end
-
---[[************************************************************************]]--
 
 --- Returns the bearing (yaw) from <this> to <pos>.
 e2function number bone:bearing(vector pos)
@@ -272,6 +268,8 @@ e2function angle bone:heading(vector pos)
 	return { elevation, bearing, 0 }
 end
 
+--[[************************************************************************]]--
+
 --- Returns <this>'s mass.
 e2function number bone:mass()
 	if not isValidBone(this) then return 0 end
@@ -305,7 +303,16 @@ e2function vector bone:inertia()
 	return this:GetInertia()
 end
 
---[[************************************************************************]]--
+__e2setcost(2)
+--- Returns 1 if <this> is frozen, 0 otherwise
+e2function number bone:isFrozen()
+	if not isValidBone(this) then return end
+	if this:IsMoveable() then return 0 else return 1 end
+end
+
+
+--[[--Bone Physics--]]--
+
 __e2setcost(30)
 
 local clamp = WireLib.clampForce
@@ -366,7 +373,7 @@ e2function void bone:applyAngForce(angle angForce)
 	end
 end
 
---- Applies torque according to the axis, magnitude and sense given by the vector's direction, magnitude and orientation.
+--- Applies torque according to the axis, magnitude and sense given by the <torque>'s direction, magnitude and orientation.
 e2function void bone:applyTorque(vector torque)
 	local ent = isValidBone(this)
 	if not ent then return end
@@ -402,12 +409,6 @@ end
 
 --[[************************************************************************]]--
 __e2setcost(2)
---- Returns 1 if <this> is frozen, 0 otherwise
-e2function number bone:isFrozen()
-	if not isValidBone(this) then return end
-	if this:IsMoveable() then return 0 else return 1 end
-end
-
 -- helper function for invert(T) in table.lua
 function e2_tostring_bone(b)
 	local ent = isValidBone(b)

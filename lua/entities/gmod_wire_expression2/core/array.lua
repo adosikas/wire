@@ -48,7 +48,7 @@ registerType("array", "r", {},
 	end
 )
 
---[[--Constructors--]]--
+--[[--Constructor--]]--
 
 --- Constructs and returns an array with the given values as elements. If you specify values that are not supported by the array data type, they are skipped
 __e2setcost(1)

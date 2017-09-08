@@ -54,7 +54,7 @@ local function check_delay( ply )
 	return false
 end
 
-/******************************************************************************/
+--[[--Simple Print--]]--
 
 local function SpecialCase( arg )
 	if istable(arg) then
@@ -84,7 +84,7 @@ local function SpecialCase( arg )
 	end
 end
 
--- Prints <...> like lua's print(...), except to the chat area
+--- Prints the arguments like lua's print(...), except to the chat area
 e2function void print(...)
 	if not checkOwner(self) then return end
 	if not check_delay( self.player ) then return end
@@ -100,12 +100,7 @@ e2function void print(...)
 	end
 end
 
---- Posts <text> to the chat area. (deprecated due to print(...))
---e2 function void print(string text)
---	self.player:ChatPrint(text)
---end
-
---- Posts a string to the chat of <this>'s driver. Returns 1 if the text was printed, 0 if not.
+--- Posts a <text> to the chat of <this>'s driver. Returns 1 if the text was printed, 0 if not.
 e2function number entity:printDriver(string text)
 	if not IsValid(this) then return 0 end
 	if not this:IsVehicle() then return 0 end
@@ -122,6 +117,32 @@ e2function number entity:printDriver(string text)
 end
 
 /******************************************************************************/
+
+-- helper stuff for printTable
+local _Msg = Msg
+local msgbuf
+local function MyMsg(s)
+	table.insert(msgbuf, s)
+end
+
+--- Prints an array like the lua function [PrintTable](http://wiki.garrysmod.com/page/Global/PrintTable) does, except to the chat area.
+e2function void printTable(array arr)
+	if not checkOwner(self) then return end
+	if not check_delay( self.player ) then return end
+
+	msgbuf = {}
+	Msg = MyMsg
+	PrintTable(arr)
+	Msg = _Msg
+	for _,line in ipairs(string.Explode("\n",table.concat(msgbuf))) do
+		self.player:ChatPrint(line)
+	end
+	msgbuf = nil
+end
+
+-- The printTable(T) function is in table.lua because it uses a local function
+
+--[[--Hint--]]--
 
 --- Displays a hint popup with message <text> for <duration> seconds (<duration> being clamped between 0.7 and 7).
 e2function void hint(string text, duration)
@@ -145,7 +166,7 @@ e2function number entity:hintDriver(string text, duration)
 	return 1
 end
 
-/******************************************************************************/
+--[[--Print to different places--]]--
 
 local valid_print_types = {}
 for _,cname in ipairs({ "HUD_PRINTCENTER", "HUD_PRINTCONSOLE", "HUD_PRINTNOTIFY", "HUD_PRINTTALK" }) do
@@ -180,33 +201,7 @@ e2function number entity:printDriver(print_type, string text)
 	return 1
 end
 
-/******************************************************************************/
-
--- helper stuff for printTable
-local _Msg = Msg
-local msgbuf
-local function MyMsg(s)
-	table.insert(msgbuf, s)
-end
-
---- Prints an array like the lua function [[G.PrintTable|PrintTable]] does, except to the chat area.
-e2function void printTable(array arr)
-	if not checkOwner(self) then return end
-	if not check_delay( self.player ) then return end
-	
-	msgbuf = {}
-	Msg = MyMsg
-	PrintTable(arr)
-	Msg = _Msg
-	for _,line in ipairs(string.Explode("\n",table.concat(msgbuf))) do
-		self.player:ChatPrint(line)
-	end
-	msgbuf = nil
-end
-
--- The printTable(T) function is in table.lua because it uses a local function
-
-/******************************************************************************/
+--[[--PrintColor--]]--
 
 __e2setcost(100)
 
@@ -275,7 +270,8 @@ local function printColorArray(chip, ply, arr)
 end
 
 
---- Works like [[chat.AddText]](...). Parameters can be any amount and combination of numbers, strings, player entities, color vectors (both 3D and 4D).
+--- Works like [chat.AddText](wiki.garrysmod.com/page/chat/AddText). Parameters can be any amount and combination of numbers, strings, player entities, color vectors (both 3D and 4D).
+--- Color vectors change the print color until the next one overwrites it.
 e2function void printColor(...)
 	printColorVarArg(nil, self.player, typeids, ...)
 end

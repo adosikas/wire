@@ -31,13 +31,17 @@ local function typeid_to_image(typeid)
     return string.format("[[Type-%s.png|alt=%s]]", typeid:upper(), E2Lib.typeName(typeid))
 end
 
+local function github_anchor(section)
+	return section:lower():gsub("[^%w]","-")
+end
+
 local function mess_with_args(args, desc)
 	local argtable, ellipses = e2_parse_args(args)
 	newargs = {}
 	for i, name in ipairs(argtable.argnames) do
 		local arg_img = typeid_to_image(argtable.typeids[i])
 		desc = desc:gsub("<" .. name .. ">", string.format("%s `%s`", arg_img, name)) -- code tags for argument in descriptions
-		table.insert(newargs,string.format("`%s `%s", arg_img, name)) -- lift code tags for image in signature
+		table.insert(newargs,string.format("%s %s", arg_img, name))
 	end
 	if ellipses then
 		table.insert(newargs,"...")
@@ -50,7 +54,9 @@ local function e2doc(filename, outfile)
 		outfile = string.match(filename, "^.*%.") .. "txt"
 	end
 	local current = {}
-	local output = { '|Function|Returns|Description|\n|:-|:-|:-|\n' }
+	local toc = { '# Contents:\n' }
+	local header = '|Function|Returns|Description|\n|:-|:-|:-|\n'
+	local output = { }
 	local section_title = nil
 	for line in string.gmatch(readfile(filename), "%s*(.-)%s*\n") do
 		if line:sub(1, 4) == "--- " then
@@ -69,12 +75,13 @@ local function e2doc(filename, outfile)
 			if thistype == nil and colon ~= nil then error("E2doc syntax error: No type for 'this' given.", 0) end
 			if thistype ~= nil and thistype:sub(1, 1):find("[0-9]") then error("E2doc syntax error: Type names may not start with a number.", 0) end
 
-			desc = table.concat(current, "  \n")
+			desc = table.concat(current, "<br>")
 			current = {}
 
 			if name:sub(1, 8) ~= "operator" and not desc:match("@nodoc") then
 				if section_title then
-					table.insert(output, '|**'..section_title..'**|||')
+					table.insert(output, '# '..section_title..'\n'..header)
+					table.insert(toc, "* ["..section_title.."](#"..github_anchor(section_title)..")\n")
 					section_title = nil
 				end
 
@@ -87,17 +94,18 @@ local function e2doc(filename, outfile)
 				end
 
 				if thistype == "" then
-					thistype = "`"
+					thistype = ""
 				else
-					thistype = typeid_to_image(e2_get_typeid(thistype)) .. "`:"
+					thistype = typeid_to_image(e2_get_typeid(thistype)) .. ":"
 				end
-				table.insert(output, string.format("| %s%s(%s)` | %s | %s |\n", thistype, name, args, ret, desc))
+				table.insert(output, string.format("| %s%s(%s) | %s | %s |\n", thistype, name, args, ret, desc))
 			end
 		end
 	end -- for line
-	output = table.concat(output)
+	local page = table.concat(toc)
+	page = page .. table.concat(output)
 	-- print(output)
-	writefile(outfile, output)
+	writefile(outfile, page)
 end
 
 -- Add a server-side "e2doc" console command

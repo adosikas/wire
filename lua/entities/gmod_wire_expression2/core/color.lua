@@ -17,7 +17,7 @@ local function ColorClamp(c)
 	return c
 end
 
---[[******************************************************************************]]--
+--[[--Entity Colors--]]--
 
 __e2setcost(2)
 
@@ -41,7 +41,7 @@ e2function number entity:getAlpha()
 	return IsValid(this) and this:GetColor().a or 0
 end
 
---- Sets the entities color
+--- Sets the entities color to given r,g,b
 e2function void entity:setColor(r,g,b)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -58,7 +58,7 @@ e2function void entity:setColor(r,g,b,a)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
---- Sets the entities color
+--- Sets the entities color to <c>
 e2function void entity:setColor(vector c)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -66,7 +66,7 @@ e2function void entity:setColor(vector c)
 	this:SetColor(ColorClamp(Color(c[1],c[2],c[3],this:GetColor().a)))
 end
 
---- Sets the entities color and alpha
+--- Sets the entities color <c> and alpha <a>
 e2function void entity:setColor(vector c, a)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -75,7 +75,7 @@ e2function void entity:setColor(vector c, a)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
---- Sets the entities color and alpha
+--- Sets the entities color and alpha to <c>
 e2function void entity:setColor(vector4 c)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -84,7 +84,7 @@ e2function void entity:setColor(vector4 c)
 	this:SetRenderMode(this:GetColor().a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
---- Sets the entities alpha
+--- Sets the entities alpha to <a>
 e2function void entity:setAlpha(a)
 	if !IsValid(this) then return end
 	if !isOwner(self, this) then return end
@@ -97,7 +97,7 @@ e2function void entity:setAlpha(a)
 	this:SetRenderMode(c.a == 255 and RENDERMODE_NORMAL or RENDERMODE_TRANSALPHA)
 end
 
---- Sets the entities render mode
+--- Sets the entities render mode to <mode>
 --- See [RENDERMODE Enum](http://wiki.garrysmod.com/page/Enums/RENDERMODE)
 e2function void entity:setRenderMode(mode)
 	if !IsValid(this) then return end
@@ -107,8 +107,7 @@ e2function void entity:setRenderMode(mode)
 	this:SetRenderMode(mode)
 end
 
---[[******************************************************************************]]--
--- HSV
+--[[--HSV Conversion--]]--
 
 --- Converts <hsv> from the [HSV color space](http://en.wikipedia.org/wiki/HSV_color_space) to the [RGB color space](http://en.wikipedia.org/wiki/RGB_color_space)
 e2function vector hsv2rgb(vector hsv)
@@ -132,7 +131,7 @@ e2function vector rgb2hsv(r, g, b)
 	return { ColorToHSV(Color(r, g, b)) }
 end
 
---- HSL
+--[[--HSL Conversion--]]--
 
 local function Convert_hue2rgb(p, q, t)
 	if t < 0 then t = t + 1 end
@@ -220,8 +219,7 @@ e2function vector rgb2hsl(r, g, b)
 	return { floor(h * 360), s, l }
 end
 
---[[******************************************************************************]]--
--- DIGI
+--[[--DigiScreen Conversion--]]--
 
 local converters = {}
 converters[0] = function(r, g, b)

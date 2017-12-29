@@ -32,29 +32,15 @@ local function typeid_to_image(typeid, alt)
 end
 
 local function github_link(section)
-	return string.format("[%s](#%s)\n",section, section:lower()::gsub("[:%(%),]","")gsub("[^%w]","-"))
+	return string.format("[%s](#%s)\n",section, section:lower():gsub("%[%[.-%]%]",""):gsub("[%(%):.,]",""):gsub("[^%w]","-"))
 end
 
 local function format_argument(typeid, name)
 	local type = E2Lib.typeName(typeid)
 	local varname = name or type
 	varname = varname:sub(1,1):upper()..varname:sub(2)
-
-	--[[ Var:type / type name
-	if name then
-		return string.format("%s:%s", varname, type),
-			string.format("`%s %s`",type, name)
-	else
-		return varname, string.format("`%s %s`",type, varname)
-	end--]]
-	---[[ img / img name
-	if name then
-		return typeid_to_image(typeid, name),
-			string.format("%s `%s`", typeid_to_image(typeid), name)
-	else
-		return typeid_to_image(typeid), string.format("`%s %s`",type, varname)
-	end--]]
-
+	
+	return varname, string.format("%s `%s`", typeid_to_image(typeid), varname)
 end
 
 local function mess_with_args(args, desc)
@@ -62,11 +48,8 @@ local function mess_with_args(args, desc)
 	newargs = {}
 	for i, name in ipairs(argtable.argnames) do
 		local infunc, indesc = format_argument(argtable.typeids[i], name)
-		--local arg_img = typeid_to_image(argtable.typeids[i])
-		--desc = desc:gsub("<" .. name .. ">", string.format("%s `%s`", arg_img, name)) -- code tags for argument in descriptions
-		--table.insert(newargs,string.format("%s %s", arg_img, name))
 		desc = desc:gsub("<" .. name .. ">", indesc)
-		table.insert(newargs,infunc)
+		table.insert(newargs, typeid_to_image(argtable.typeids[i])..infunc)
 	end
 	if ellipses then
 		table.insert(newargs,"...")
@@ -80,9 +63,9 @@ local function e2doc(filename, outfile)
 	end
 	local current = {}
 	local toc = { '# Contents:\n' }
-	local header = '|Function|R|Description|\n|:-|:-|:-|\n'
 	local output = { }
 	local section_title = nil
+	local function_header = nil
 	for line in string.gmatch(readfile(filename), "%s*(.-)%s*\n") do
 		if line:sub(1, 4) == "--- " then
 			if line:match("[^-%s]") then table.insert(current, ltrim(line:sub(4))) end
@@ -105,32 +88,37 @@ local function e2doc(filename, outfile)
 
 			if name:sub(1, 8) ~= "operator" and not desc:match("@nodoc") then
 				if section_title then
-					table.insert(output, '# '..section_title..'\n'..header)
-					table.insert(toc, "* "..github_link(section_title).."\n")
+					table.insert(output, '# '..section_title..'\n')
+					table.insert(toc, "* "..github_link(section_title))
 					section_title = nil
 				end
-
+				
 				args, desc = mess_with_args(args, desc)
 
 				if ret==nil or ret == "void" then
 					ret = ""
 				else
-					ret = typeid_to_image(e2_get_typeid(ret))
-					--ret,_ = format_argument(ret)
+					--ret = typeid_to_image(e2_get_typeid(ret))
+					ret,_ = "> > Returns "..format_argument(e2_get_typeid(ret)).."  \n"
 				end
 
 				if thistype == "" then
 					thistype = ""
 				else
 					--thistype = typeid_to_image(e2_get_typeid(thistype)) .. ":"
-					thistype,_ = format_argument(e2_get_typeid(thistype)) .. ":"
+					local _, replace = format_argument(e2_get_typeid(thistype))
+					desc = desc:gsub("<this>", replace)
+					local typename = thistype:sub(1,1):upper()..thistype:sub(2)
+					thistype = typename .. ":"
 				end
-				table.insert(output, string.format("| %s%s(%s) | %s | %s |\n", thistype, name, args, ret, desc))
+				function_header = string.format("%s%s(%s)", thistype, name, args)
+				table.insert(toc, "    * "..github_link(function_header))
+				table.insert(output, string.format("> ## %s\n%s> > %s\n>\n", function_header, ret, desc))
 			end
 		end
 	end -- for line
 	local page = table.concat(toc)
-	page = page .. table.concat(output)
+	page = page .."\n".. table.concat(output)
 	-- print(output)
 	writefile(outfile, page)
 end

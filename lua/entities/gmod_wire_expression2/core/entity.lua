@@ -76,87 +76,87 @@ e2function number operator!=(entity lhs, entity rhs)
 	if lhs ~= rhs then return 1 else return 0 end
 end
 
-/******************************************************************************/
+--[[--ID--]]--
 
+--- Get Entity by <id>
 e2function entity entity(id)
 	local ent = ents.GetByIndex(id)
 	if not IsValid(ent) then return nil end
 	return ent
 end
 
+--- Get id of <this>
 e2function number entity:id()
 	if not IsValid(this) then return 0 end
 	return this:EntIndex()
 end
 
+--- Get creation id of <this> (See http://wiki.garrysmod.com/page/Entity/GetCreationID)
 e2function number entity:creationID()
 	if not IsValid(this) then return 0 end
 	return this:GetCreationID()
 end
 
-/******************************************************************************/
-// Functions getting string
-
+--- Get a invalid/NULL entity
 e2function entity noentity()
 	return NULL
 end
 
+--- Get the world entity
 e2function entity world()
 	return game.GetWorld()
 end
 
+--[[--String attributes--]]--
+
+--- Get type/class of <this>
 e2function string entity:type()
 	if not IsValid(this) then return "" end
 	return this:GetClass()
 end
 
+--- Get model of <this>
 e2function string entity:model()
 	if not IsValid(this) then return "" end
 	return this:GetModel() or ""
 end
 
-e2function entity entity:owner()
-	if not IsValid(this) then return nil end
-	return getOwner(self, this)
-end
+--[[--Vector attributes--]]--
 
-/******************************************************************************/
-// Functions getting vector
+--- Get position of <this>
 e2function vector entity:pos()
 	if not IsValid(this) then return {0,0,0} end
 	return this:GetPos()
 end
 
+--- Get forward direction of <this>
 e2function vector entity:forward()
 	if not IsValid(this) then return {0,0,0} end
 	return this:GetForward()
 end
 
+--- Get right direction of <this>
 e2function vector entity:right()
 	if not IsValid(this) then return {0,0,0} end
 	return this:GetRight()
 end
 
+--- Get up direction of <this>
 e2function vector entity:up()
 	if not IsValid(this) then return {0,0,0} end
 	return this:GetUp()
 end
 
+--- Get velocity of <this>
 e2function vector entity:vel()
 	if not IsValid(this) then return {0,0,0} end
 	return this:GetVelocity()
 end
 
+--- Get velocity local to the entity
 e2function vector entity:velL()
 	if not IsValid(this) then return {0,0,0} end
 	return this:WorldToLocal(this:GetVelocity() + this:GetPos())
-end
-
-e2function angle entity:angVel()
-	if not validPhysics(this) then return {0,0,0} end
-	local phys = this:GetPhysicsObject()
-	local vec = phys:GetAngleVelocity()
-	return { vec.y, vec.z, vec.x }
 end
 
 --- Returns a vector describing rotation axis, magnitude and sense given as the vector's direction, magnitude and orientation.
@@ -166,26 +166,140 @@ e2function vector entity:angVelVector()
 	return phys:GetAngleVelocity()
 end
 
-/******************************************************************************/
-// Functions  using vector getting vector
+__e2setcost(10)
+
+--- Gets center of mass
+e2function vector entity:massCenter()
+	if not validPhysics(this) then return {0,0,0} end
+	local phys = this:GetPhysicsObject()
+	return this:LocalToWorld(phys:GetMassCenter())
+end
+
+--- Gets center of mass, local to the entity
+e2function vector entity:massCenterL()
+	if not validPhysics(this) then return {0,0,0} end
+	local phys = this:GetPhysicsObject()
+	return phys:GetMassCenter()
+end
+
+__e2setcost(30)
+
+--- Gets inertia for each axis
+e2function vector entity:inertia()
+	if not validPhysics(this) then return {0,0,0} end
+	return this:GetPhysicsObject():GetInertia()
+end
+
+--[[--Bounding Box--]]--
+
+__e2setcost(10)
+
+--- Gets bounding box size
+e2function vector entity:boxSize()
+	if not IsValid(this) then return {0,0,0} end
+	return this:OBBMaxs() - this:OBBMins()
+end
+
+--- Gets bounding box maximum corner
+e2function vector entity:boxMax()
+	if not IsValid(this) then return {0,0,0} end
+	return this:OBBMaxs()
+end
+
+--- Gets bounding box minimum corner
+e2function vector entity:boxMin()
+	if not IsValid(this) then return {0,0,0} end
+	return this:OBBMins()
+end
+
+--- Gets bounding box center in local coordinates
+e2function vector entity:boxCenter()
+	if not IsValid(this) then return {0,0,0} end
+	return this:OBBCenter()
+end
+
+--- Gets bounding box center in global coordinates
+e2function vector entity:boxCenterW()
+	if not IsValid(this) then return {0,0,0} end
+	return this:LocalToWorld(this:OBBCenter())
+end
+
+--- Gets axis-aligned bounding box size
+e2function vector entity:aabbSize()
+	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
+	local ret, ret2 = this:GetPhysicsObject():GetAABB()
+	ret = ret or Vector(0,0,0)
+	ret2 = ret2 or Vector(0,0,0)
+	return ret2 - ret
+end
+
+--- Gets axis-aligned bounding box minimum corner
+e2function vector entity:aabbMin()
+	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
+	local ret, _ = this:GetPhysicsObject():GetAABB()
+	return ret or {0,0,0}
+end
+
+--- Gets axis-aligned bounding box maximum corner
+e2function vector entity:aabbMax()
+	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
+	local _, ret = this:GetPhysicsObject():GetAABB()
+	return ret or {0,0,0}
+end
+
+--- Returns the rotated entity's min world-axis-aligned bounding box corner
+e2function vector entity:aabbWorldMin()
+	if not IsValid(this) then return {0,0,0} end
+	local ret, _ = this:WorldSpaceAABB()
+	return ret or {0,0,0}
+end
+
+--- Returns the rotated entity's max world-axis-aligned bounding box corner
+e2function vector entity:aabbWorldMax()
+	if not IsValid(this) then return {0,0,0} end
+	local _, ret = this:WorldSpaceAABB()
+	return ret or {0,0,0}
+end
+
+--- Returns the rotated entity's world-axis-aligned bounding box size
+e2function vector entity:aabbWorldSize()
+	if not IsValid(this) then return {0,0,0} end
+	local ret, ret2 = this:WorldSpaceAABB()
+	ret = ret or Vector(0,0,0)
+	ret2 = ret2 or Vector(0,0,0)
+	return ret2 - ret
+end
+
+__e2setcost(15)
+--- Get the closest point on the bounding box of <this> to <point>
+e2function vector entity:nearestPoint( vector point )
+	if (!IsValid(this)) then return {0,0,0} end
+	return this:NearestPoint( Vector(point[1],point[2],point[3]) )
+end
+
+--[[--Coordinate transformations--]]--
 
 __e2setcost(15)
 
+--- Transforms <localPosition> relative to <this> into global coordinates
 e2function vector entity:toWorld(vector localPosition)
 	if not IsValid(this) then return {0,0,0} end
 	return this:LocalToWorld(Vector(localPosition[1],localPosition[2],localPosition[3]))
 end
 
+--- Transforms <worldPosition> into local coordinates relative to <this>
 e2function vector entity:toLocal(vector worldPosition)
 	if not IsValid(this) then return {0,0,0} end
 	return this:WorldToLocal(Vector(worldPosition[1],worldPosition[2],worldPosition[3]))
 end
 
+--- Transforms direction vector/axis <localAxis> relative to <this> into global coordinates
 e2function vector entity:toWorldAxis(vector localAxis)
 	if not IsValid(this) then return {0,0,0} end
 	return this:LocalToWorld(Vector(localAxis[1],localAxis[2],localAxis[3]))-this:GetPos()
 end
 
+--- Transforms direction vector/axis <worldAxis> into local coordinates relative to <this>
 e2function vector entity:toLocalAxis(vector worldAxis)
 	if not IsValid(this) then return {0,0,0} end
 	return this:WorldToLocal(Vector(worldAxis[1],worldAxis[2],worldAxis[3])+this:GetPos())
@@ -205,31 +319,33 @@ e2function angle entity:toLocal(angle worldAngle)
 	return { localAngle.p, localAngle.y, localAngle.r }
 end
 
-/******************************************************************************/
-// Functions getting number
+--[[--Numeric attributes--]]--
 
 __e2setcost(5)
 
+--- Gets health of <this>
 e2function number entity:health()
 	if not IsValid(this) then return 0 end
 	return this:Health()
 end
 
+--- Gets maximum health of <this>
 e2function number entity:maxHealth()
 	if not IsValid(this) then return 0 end
 	return this:GetMaxHealth()
 end
 
+--- Gets approximate bounding box radius
 e2function number entity:radius()
 	if not IsValid(this) then return 0 end
 	return this:BoundingRadius()
 end
 
-// original bearing & elevation thanks to Gwahir
---- Returns the bearing (yaw) from <this> to <pos>
+-- original bearing & elevation thanks to Gwahir
 
 __e2setcost(15)
 
+--- Returns the bearing (yaw) from <this> to <pos>
 e2function number entity:bearing(vector pos)
 	if not IsValid(this) then return 0 end
 
@@ -249,43 +365,16 @@ e2function number entity:elevation(vector pos)
 	return rad2deg*asin(pos.z / len)
 end
 
---- Returns the elevation (pitch) and bearing (yaw) from <this> to <pos>
-e2function angle entity:heading(vector pos)
-	if not IsValid(this) then return { 0, 0, 0 } end
-
-	pos = this:WorldToLocal(Vector(pos[1],pos[2],pos[3]))
-
-	-- bearing
-	local bearing = rad2deg*-atan2(pos.y, pos.x)
-
-	-- elevation
-	local len = pos:Length()--sqrt(x*x + y*y + z*z)
-	if len < delta then return { 0, bearing, 0 } end
-	local elevation = rad2deg*asin(pos.z / len)
-
-	return { elevation, bearing, 0 }
-end
-
 __e2setcost(10)
 
+--- Gets mass of <this>
 e2function number entity:mass()
 	if not validPhysics(this) then return 0 end
 	local phys = this:GetPhysicsObject()
 	return phys:GetMass()
 end
 
-e2function vector entity:massCenter()
-	if not validPhysics(this) then return {0,0,0} end
-	local phys = this:GetPhysicsObject()
-	return this:LocalToWorld(phys:GetMassCenter())
-end
-
-e2function vector entity:massCenterL()
-	if not validPhysics(this) then return {0,0,0} end
-	local phys = this:GetPhysicsObject()
-	return phys:GetMassCenter()
-end
-
+--- Set mass for current E2
 e2function void setMass(mass)
 	if not validPhysics(self.entity) then return end
 	if E2Lib.isnan( mass ) then mass = 50000 end
@@ -294,6 +383,7 @@ e2function void setMass(mass)
 	phys:SetMass(mass)
 end
 
+--- Set mass of <this>
 e2function void entity:setMass(mass)
 	if not validPhysics(this) then return end
 	if not isOwner(self, this) then return end
@@ -304,44 +394,77 @@ e2function void entity:setMass(mass)
 	phys:SetMass(mass)
 end
 
+--- Get volume of <this>
 e2function number entity:volume()
 	if not validPhysics(this) then return 0 end
 	local phys = this:GetPhysicsObject()
 	return phys:GetVolume()
 end
 
-/******************************************************************************/
-// Functions getting boolean/number
+--[[--Checks--]]--
+
+--- Checks if <this> is a player
 e2function number entity:isPlayer()
 	if not IsValid(this) then return 0 end
 	if this:IsPlayer() then return 1 else return 0 end
 end
 
+--- Checks if <this> is a NPC
 e2function number entity:isNPC()
 	if not IsValid(this) then return 0 end
 	if this:IsNPC() then return 1 else return 0 end
 end
 
+--- Checks if <this> is a vehicle
 e2function number entity:isVehicle()
 	if not IsValid(this) then return 0 end
 	if this:IsVehicle() then return 1 else return 0 end
 end
 
+--- Checks if <this> is a weapon
+e2function number entity:isWeapon()
+	if not IsValid(this) then return 0 end
+	if this:IsWeapon() then return 1 else return 0 end
+end
+
+--- Checks if <this> is the world entity
 e2function number entity:isWorld()
 	if not isentity(this) then return 0 end
 	if this:IsWorld() then return 1 else return 0 end
 end
 
+--- Checks if <this> has the FL_ONGROUND flag
 e2function number entity:isOnGround()
 	if not IsValid(this) then return 0 end
 	if this:IsOnGround() then return 1 else return 0 end
 end
 
+--- Checks if <this> is under water
 e2function number entity:isUnderWater()
 	if not IsValid(this) then return 0 end
 	if this:WaterLevel() > 0 then return 1 else return 0 end
 end
 
+--- Checks if <this> is being held by any players via physgun, gravgun or use key
+e2function number entity:isPlayerHolding()
+	if not IsValid(this) then return 0 end
+	if this:IsPlayerHolding() then return 1 else return 0 end
+end
+
+--- Checks if <this> is on fire
+e2function number entity:isOnFire()
+	if not IsValid(this) then return 0 end
+	if this:IsOnFire() then return 1 else return 0 end
+end
+
+--- Checks if <this> is frozen
+e2function number entity:isFrozen()
+	if not validPhysics(this) then return 0 end
+	local phys = this:GetPhysicsObject()
+	if phys:IsMoveable() then return 0 else return 1 end
+end
+
+--- Checks if <this> is a valid entity
 e2function number entity:isValid()
 	return IsValid(this) and 1 or 0
 end
@@ -351,14 +474,15 @@ e2function number entity:isValidPhysics()
 	return E2Lib.validPhysics(this) and 1 or 0
 end
 
-/******************************************************************************/
-// Functions getting angles
+--[[--Angles--]]--
 
+--- Gets rotation of <this>
 e2function angle entity:angles()
 	if not IsValid(this) then return {0,0,0} end
 	local ang = this:GetAngles()
 	return {ang.p,ang.y,ang.r}
 end
+__e2setcost(5)
 
 /******************************************************************************/
 
@@ -577,89 +701,6 @@ e2function void entity:ejectPod()
 	if IsValid(ply) then ply:ExitVehicle() end
 end
 
-/******************************************************************************/
-
-__e2setcost(10)
-
-e2function vector entity:boxSize()
-	if not IsValid(this) then return {0,0,0} end
-	return this:OBBMaxs() - this:OBBMins()
-end
-
-e2function vector entity:boxCenter()
-	if not IsValid(this) then return {0,0,0} end
-	return this:OBBCenter()
-end
-
--- Same as using E:toWorld(E:boxCenter()) in E2, but since Lua runs faster, this is more efficient.
-e2function vector entity:boxCenterW()
-	if not IsValid(this) then return {0,0,0} end
-	return this:LocalToWorld(this:OBBCenter())
-end
-
-e2function vector entity:boxMax()
-	if not IsValid(this) then return {0,0,0} end
-	return this:OBBMaxs()
-end
-
-e2function vector entity:boxMin()
-	if not IsValid(this) then return {0,0,0} end
-	return this:OBBMins()
-end
-
-
-/******************************************************************************/
-
--- Returns the entity's (min) axis-aligned bounding box
-e2function vector entity:aabbMin()
-	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
-	local ret, _ = this:GetPhysicsObject():GetAABB()
-	return ret or {0,0,0}
-end
-
--- Returns the entity's (max) axis-aligned bounding box
-e2function vector entity:aabbMax()
-	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
-	local _, ret = this:GetPhysicsObject():GetAABB()
-	return ret or {0,0,0}
-end
-
--- Returns the entity's axis-aligned bounding box size
-e2function vector entity:aabbSize()
-	if not IsValid(this) or not IsValid(this:GetPhysicsObject()) then return {0,0,0} end
-	local ret, ret2 = this:GetPhysicsObject():GetAABB()
-	ret = ret or Vector(0,0,0)
-	ret2 = ret2 or Vector(0,0,0)
-	return ret2 - ret
-end
-
-
-/******************************************************************************/
-
--- Returns the rotated entity's min world-axis-aligned bounding box corner
-e2function vector entity:aabbWorldMin()
-	if not IsValid(this) then return {0,0,0} end
-	local ret, _ = this:WorldSpaceAABB()
-	return ret or {0,0,0}
-end
-
--- Returns the rotated entity's max world-axis-aligned bounding box corner
-e2function vector entity:aabbWorldMax()
-	if not IsValid(this) then return {0,0,0} end
-	local _, ret = this:WorldSpaceAABB()
-	return ret or {0,0,0}
-end
-
--- Returns the rotated entity's world-axis-aligned bounding box size
-e2function vector entity:aabbWorldSize()
-	if not IsValid(this) then return {0,0,0} end
-	local ret, ret2 = this:WorldSpaceAABB()
-	ret = ret or Vector(0,0,0)
-	ret2 = ret2 or Vector(0,0,0)
-	return ret2 - ret
-end
-/******************************************************************************/
-
 __e2setcost(5)
 
 e2function entity entity:driver()
@@ -802,7 +843,7 @@ end
 __e2setcost(15)
 
 e2function vector entity:nearestPoint( vector point )
-	if not IsValid(this) then return {0,0,0} end
+	if (!IsValid(this)) then return {0,0,0} end
 	return this:NearestPoint( Vector(point[1],point[2],point[3]) )
 end
 

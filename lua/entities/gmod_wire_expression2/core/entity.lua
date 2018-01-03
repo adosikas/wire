@@ -159,7 +159,7 @@ e2function vector entity:velL()
 	return this:WorldToLocal(this:GetVelocity() + this:GetPos())
 end
 
---- Returns a vector describing rotation axis, magnitude and sense given as the vector's direction, magnitude and orientation.
+--- Returns a vector describing rotation axis, magnitude and sense given as the vector's direction, magnitude and orientation
 e2function vector entity:angVelVector()
 	if not validPhysics(this) then return { 0, 0, 0 } end
 	local phys = this:GetPhysicsObject()
@@ -305,14 +305,14 @@ e2function vector entity:toLocalAxis(vector worldAxis)
 	return this:WorldToLocal(Vector(worldAxis[1],worldAxis[2],worldAxis[3])+this:GetPos())
 end
 
---- Transforms from an angle local to <this> to a world angle.
+--- Transforms from an angle local to <this> to a world angle
 e2function angle entity:toWorld(angle localAngle)
 	if not IsValid(this) then return { 0, 0, 0 } end
 	local worldAngle = this:LocalToWorldAngles(Angle(localAngle[1],localAngle[2],localAngle[3]))
 	return { worldAngle.p, worldAngle.y, worldAngle.r }
 end
 
---- Transforms from a world angle to an angle local to <this>.
+--- Transforms from a world angle to an angle local to <this>
 e2function angle entity:toLocal(angle worldAngle)
 	if not IsValid(this) then return { 0, 0, 0 } end
 	local localAngle = this:WorldToLocalAngles(Angle(worldAngle[1],worldAngle[2],worldAngle[3]))
@@ -469,7 +469,7 @@ e2function number entity:isValid()
 	return IsValid(this) and 1 or 0
 end
 
---- Returns 1 if <this> has valid physics. Note: Players do not.
+--- Returns 1 if <this> has valid physics. Note: Players do not
 e2function number entity:isValidPhysics()
 	return E2Lib.validPhysics(this) and 1 or 0
 end
@@ -517,31 +517,31 @@ e2function void entity:setSubMaterial(index, string material)
 	E2Lib.setSubMaterial(this, index-1, material)
 end
 
---- Gets <this>'s current skin number.
+--- Gets <this>'s current skin number
 e2function number entity:getSkin()
 	if IsValid(this) then return this:GetSkin() end
 	return 0
 end
 
---- Sets <this>'s skin number.
+--- Sets <this>'s skin number
 e2function void entity:setSkin(skin)
 	if IsValid(this) then this:SetSkin(skin) end
 end
 
---- Gets <this>'s number of skins.
+--- Gets <this>'s number of skins
 e2function number entity:getSkinCount()
 	if IsValid(this) then return this:SkinCount() end
 	return 0
 end
 
---- Sets <this>'s bodygroup.
+--- Sets <this>'s bodygroup
 e2function void entity:setBodygroup(bgrp_id, bgrp_subid)
 	if not IsValid(this) then return end
 	if not isOwner(self, this) then return end
 	this:SetBodygroup(bgrp_id, bgrp_subid)
 end
 
---- Gets <this>'s bodygroup count.
+--- Gets <this>'s bodygroup count
 e2function number entity:getBodygroups(bgrp_id)
 	if IsValid(this) then return this:GetBodygroupCount(bgrp_id) end
 	return 0
@@ -633,7 +633,7 @@ e2function void entity:applyAngForce(angle angForce)
 	end
 end
 
---- Applies torque according to a local torque vector, with magnitude and sense given by the vector's direction, magnitude and orientation.
+--- Applies torque according to a local torque vector, with magnitude and sense given by the vector's direction, magnitude and orientation
 e2function void entity:applyTorque(vector torque)
 	if not IsValid(this) then return end
 	if not isOwner(self, this) then return end
@@ -713,7 +713,7 @@ e2function entity entity:passenger()
 	return this:GetPassenger(0)
 end
 
---- Returns <ent> formatted as a string. Returns "<code>(null)</code>" for invalid entities.
+--- Returns <ent> formatted as a string. Returns "<code>(null)</code>" for invalid entities
 e2function string toString(entity ent)
 	if not IsValid(ent) then return "(null)" end
 	return tostring(ent)
@@ -725,7 +725,7 @@ e2function string entity:toString() = e2function string toString(entity ent)
 
 local SetTrails = duplicator.EntityModifiers.trail
 
---- Removes the trail from <this>.
+--- Removes the trail from <this>
 e2function void entity:removeTrails()
 	if not checkOwner(self) then return end
 	if not IsValid(this) then return end
@@ -752,7 +752,7 @@ end
 __e2setcost(30)
 
 --- StartSize, EndSize, Length, Material, Color (RGB), Alpha
---- Adds a trail to <this> with the specified attributes.
+--- Adds a trail to <this> with the specified attributes
 e2function void entity:setTrails(startSize, endSize, length, string material, vector color, alpha)
 	if not checkOwner(self) then return end
 	if not IsValid(this) then return end
@@ -766,7 +766,7 @@ end
 
 
 --- StartSize, EndSize, Length, Material, Color (RGB), Alpha, AttachmentID, Additive
---- Adds a trail to <this> with the specified attributes.
+--- Adds a trail to <this> with the specified attributes
 e2function void entity:setTrails(startSize, endSize, length, string material, vector color, alpha, attachmentID, additive)
 	if not checkOwner(self) then return end
 	if not IsValid(this) then return end

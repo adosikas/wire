@@ -39,7 +39,7 @@ local function format_argument(typeid, name)
 	local type = E2Lib.typeName(typeid)
 	local varname = name or type
 	varname = varname:sub(1,1):upper()..varname:sub(2)
-	
+
 	return varname, string.format("%s `%s`", typeid_to_image(typeid), varname)
 end
 
@@ -92,7 +92,7 @@ local function e2doc(filename, outfile)
 					table.insert(toc, "* "..github_link(section_title))
 					section_title = nil
 				end
-				
+
 				args, desc = mess_with_args(args, desc)
 
 				if ret==nil or ret == "void" then
